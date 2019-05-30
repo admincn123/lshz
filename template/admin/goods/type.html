@@ -1,0 +1,113 @@
+<div class="layui-card">
+    <div class="layui-tab layui-tab-brief">
+        <ul class="layui-tab-title">
+            <li class="layui-this">商品分类</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <div class="layui-hide" id="type" lay-filter="type"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.config({
+        base: '/'
+    }).use(['app','table'], function(){
+        var app = layui.app;
+
+        // 列表
+        layui.table.render({
+            elem: '#type',
+            toolbar: true,
+            url: 'admin.php/Goods/type?route='+location.hash.substring(1),
+            page: {layout: ['count', 'prev', 'page', 'next'],limit: 10},
+            done: function(res){app.basic._nodes(res.other);},
+            cols: [[
+                {type:'checkbox'},
+                {field:'name', title:'分类名称'},
+                {field:'time', title:'添加时间'},
+                {field:'id', title:'ID'}
+            ]],
+        });
+        layui.table.on('toolbar(type)', function(obj){
+            app.basic._isNode(this.getAttribute('access-id'), function(){
+                // 添加
+                if(obj.event == 'add'){
+                    modal({
+                        "title":"添加",
+                        "filter":"add",
+                        "file":"goods/type-modal",
+                        "width":"20%",
+                        "height":"170px"
+                    });
+                    layui.form.on('submit(add)', function(data){
+                        app.basic._ajax('admin.php/Goods/typeAdd',data.field,function(){
+                            app.lay._tableReload('添加成功','type');
+                        });
+                    });
+                }
+                // 编辑
+                if(obj.event == 'edit'){
+                    var data = layui.table.checkStatus('type').data;
+                    if(data.length != 1){
+                        layui.layer.msg('请确认操作对象', {icon: 5});
+                    }else{
+                        modal({
+                            "title":"编辑",
+                            "filter":"edit",
+                            "file":"goods/type-modal",
+                            "width":"20%",
+                            "height":"170px",
+                            "data":data[0]
+                        });
+                        layui.form.on('submit(edit)', function(data){
+                            app.basic._ajax('admin.php/Goods/typeEdit',data.field,function(){
+                                app.lay._tableReload('更新成功','type');
+                            });
+                        });
+                    }
+                }
+                // 删除
+                if(obj.event == 'del'){
+                    var data = layui.table.checkStatus('type').data;
+                    if(data.length < 1){
+                        layui.layer.msg('请确认操作对象', {icon: 5});
+                    }else{
+                        var ids = data.map(function(el){
+                            return +el.id;
+                        });
+                        app.lay._confirm('确认删除么？', function(){
+                            app.basic._ajax('admin.php/Goods/typeDel', {'ids':ids}, function(){
+                                app.lay._tableReload('删除成功','type');
+                            });
+                        });
+                    }
+                }
+            });
+        });
+        // 状态
+        layui.form.on('switch(status)', function(obj){
+            var _that = this;
+            app.basic._isNode(app.o(this).attr('access-id'), function(){
+                (parseInt(_that.value) == 0)? status = 1 : status = 0;
+                var data = {'id':_that.id, 'status':status};
+                app.basic._ajax('admin.php/Goods/typeStatus', data, function(){
+                    app.lay._tableReload('操作成功','type');
+                });
+            });
+        });
+
+        // 打开窗口
+        function modal(param){
+            app.lay._layer(param.title, param.filter, param.file, function(){
+                if(param.filter == 'edit') layui.form.val('form',{"id":param.data.id,"name":param.data.name});
+            }, param.width, param.height);
+        }
+    });
+    // 列表状态
+    // {field:'status', title:'状态', templet:function(e){
+    //     (!e.status)? checked = 'checked': checked = '';
+    //     return '<input type="checkbox" name="status" value="'+e.status+'" id="'+e.id+'" lay-skin="switch" lay-text="开启|关闭" lay-filter="status" '+checked+'>';
+    // }},
+</script>

@@ -1,0 +1,112 @@
+<?php
+    define('PAGE_TITLE', '后台管理'); 
+    define('BODY_CLASS', 'layui-layout-body');
+?>
+{include file="common/header" /}
+    <div class="layui-layout layui-layout-admin">
+        <div class="layui-header">
+            <div class="layui-logo">零食盒子</div>
+            <ul class="layui-nav layui-layout-left PC">
+                <li class="layui-nav-item">
+                    <i class="flexible-pc layui-icon layui-icon-shrink-right"></i>
+                </li>
+            </ul>
+            <ul class="layui-nav layui-layout-right PC">
+                <li class="layui-nav-item">
+                    <a href="javascript:;">
+                        <img src="/static/style/admin/images/logo.jpg" class="layui-nav-img">
+                        <span class="account">--</span>
+                    </a>
+                    <dl class="layui-nav-child">
+                        <dd><a href="javascript:;" class="admin-info">修改资料</a></dd>
+                        <dd><a href="javascript:;" class="sign-out">安全退出</a></dd>
+                    </dl>
+                </li>
+            </ul>
+            <div class="flexible-mb-item MB">
+                <i class="flexible-mb layui-icon layui-icon-app"></i>
+            </div>
+        </div>
+        <div class="layui-side layui-bg-black PC">
+            <div class="layui-side-scroll">
+                <div class="admin-face">
+                    <img src="/static/style/admin/images/logo.jpg">
+                    <p>您好！<span class="account">--</span>，欢迎登录</p>
+                </div>
+                <ul class="layui-nav layui-nav-tree" id="nav-left" lay-filter="nav-left"></ul>
+            </div>
+        </div>
+        <!-- 内容主体区域 -->
+        <div class="layui-body"></div>
+        <!-- 底部固定区域 -->
+        <div class="layui-footer">© 零食盒子 - 后台管理</div>
+    </div>
+    <script>
+        layui.config({
+            base: '/'
+        }).use(['app'], function(){
+            var app = layui.app;
+
+            // 系统菜单
+            app.basic._ajax('admin.php/Common/nav', '', function(result){
+                app.basic._nav(result.data);
+            });
+            // 账号
+            var obj_account = document.getElementsByClassName('account');
+            for(var i=0 ;i<obj_account.length; i++){
+                obj_account[i].innerHTML = sessionStorage.getItem('account');
+            }
+            // 修改资料
+            document.getElementsByClassName('admin-info')[0].onclick = function(){
+                app.lay._layer('修改密码', 'edit', 'system/admin-pwd', function(layero, index){
+                    layui.form.on('submit(edit)', function(data){
+                        data.field.password = app.handle._md5(data.field.password);
+                        data.field.password_new = app.handle._md5(data.field.password_new);
+                        app.basic._ajax('admin.php/main/editPwd', data.field, function(result){
+                            layui.layer.close(index); sessionStorage.clear();
+                            app.route._reload('修改成功，请重新登录');
+                        });
+                    });
+                }, '25%', '286px');
+            }
+            // 安全退出
+            document.getElementsByClassName('sign-out')[0].addEventListener('click', function(){
+                app.lay._confirm('确认退出么？', function(){
+                    app.basic._ajax('admin.php/Logreg/signOut', '', function(){
+                        app.route._reload('退出成功');
+                    });
+                });
+            });
+            
+            // PC端伸缩左侧菜单
+            document.getElementsByClassName('flexible-pc')[0].addEventListener('click', function(){
+                var _that = this,
+                    obj_layui_side = app.o('.layui-side'),
+                    obj_layui_body = app.o('.layui-body'),
+                    obj_layui_footer = app.o('.layui-footer'),
+                    obj_logo = app.o('.layui-logo'),
+                    obj_menu_btn = app.o('.layui-layout-left');
+
+                if(_that.className.indexOf('layui-icon-shrink-right') != -1){
+                    _that.classList.remove('layui-icon-shrink-right');
+                    _that.classList.add('layui-icon-spread-left');
+                    obj_layui_body.animate({left: ''});
+                    obj_layui_footer.animate({left: ''});
+                    obj_menu_btn.animate({left: ''});
+                }else{
+                    _that.classList.add('layui-icon-shrink-right');
+                    _that.classList.remove('layui-icon-spread-left');
+                    obj_layui_body.animate({left: '200px'});
+                    obj_layui_footer.animate({left: '200px'});
+                    obj_menu_btn.animate({left: '200px'});
+                }
+                obj_layui_side.animate({width:'toggle'});
+                obj_logo.animate({width:'toggle'});
+            });
+            // 手机端伸缩左侧菜单
+            document.getElementsByClassName('flexible-mb')[0].addEventListener('click', function(){
+                app.o('.layui-side').animate({width:'toggle'});
+            });
+        });
+    </script>
+{include file="common/footer" /}

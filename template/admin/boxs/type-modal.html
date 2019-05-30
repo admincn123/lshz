@@ -1,0 +1,73 @@
+<form class="layui-form layui-form-pane" lay-filter="form">
+    <input name="id" type="hidden">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">选择父级</label>
+                    <div class="layui-input-block">
+                        <div class="layui-unselect layui-form-select tree">
+                            <div class="layui-select-title">
+                                <input placeholder="默认为顶级" class="layui-input layui-unselect" readonly="" type="text">
+                                <input name="pid" type="hidden">
+                                <i class="layui-edge"></i>
+                            </div>
+                            <dl class="layui-anim layui-anim-upbit">
+                                <dd lay-value="" class="layui-select-tips">默认为顶级</dd>
+                                <dd id="boxs_area"></dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">分区名称</label>
+                    <div class="layui-input-block">
+                        <input name="name" lay-verify="notempty" lay-verType="tips" placeholder="请输入分区名称" type="text" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-col-md12 layer-btn-box">
+                <div class="layui-form-item">
+                    <button type="reset" class="layui-btn layui-btn-sm layui-btn-primary layui-layer-close" >取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    layui.config({
+        base: '/'
+    }).use(['app'], function(){
+        var app = layui.app;
+
+        // 父级列表
+        app.basic._ajax('admin.php/Boxs/area','',function(result){
+            var checkedIds = [];
+            checkedIds.push(parseInt(sessionStorage.getItem('checked')));
+            app.Tree.render({
+                elem:'#boxs_area',
+                is_checkbox:false,
+                data:result.data,
+                icon_key:'name',
+                cols:[{key:'name',title:'名称'}],
+                checked:{key:'id',data:checkedIds},
+                end:function(){sessionStorage.removeItem('checked');}
+            });
+        });
+        // 添加
+        layui.form.on('submit(add)',function(data){
+            app.basic._ajax('admin.php/Boxs/areaAdd',data.field,function(){
+                app.route._reload('添加成功');
+            });
+        });
+        // 更新
+        layui.form.on('submit(edit)', function(data){
+            app.basic._ajax('admin.php/Boxs/areaEdit',data.field,function(){
+                app.route._reload('更新成功');
+            });
+        });
+    });
+</script>

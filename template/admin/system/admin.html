@@ -1,0 +1,169 @@
+<div class="layui-card">
+    <div class="layui-tab layui-tab-brief">
+        <ul class="layui-tab-title">
+            <li class="layui-this">后台用户</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <div class="layui-hide" id="admin" lay-filter="admin"></div>
+                <script type="text/html" id="tool-html">
+                    <a lay-event="library" class="layui-btn layui-btn-primary layui-btn-xs">管理仓库</a>
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.config({
+        base: '/'
+    }).use(['app','table'], function(){
+        var app = layui.app;
+
+        // 列表
+        layui.table.render({
+            elem: '#admin',
+            toolbar: true,
+            url: 'admin.php/System/admin?route='+location.hash.substring(1),
+            page: {layout: ['count', 'prev', 'page', 'next'],limit: 10},
+            done: function(res){app.basic._nodes(res.other);},
+            cols: [[
+                {type:'checkbox'},
+                {field:'account', title:'用户账号'},
+                {field:'role_name', title:'用户角色'},
+                {field:'sign_datetime', title:'上次登录时间'},
+                {field:'sign_ip', title: '上次登录IP'},
+                {title:'注册时间', templet:function(d){
+                    (d.id != 1)? str = d.register_datetime : str = '很久很久以前';
+                    return str;
+                }},
+                {field:'register_ip', title:'注册IP', templet:function(d){
+                    (d.id != 1)? str = d.register_ip : str = '天还是蓝的，水还是绿的';
+                    return str;
+                }},
+                {field:'status', title:'状态', width:92, templet:function(e){
+                    (!e.status)? checked = 'checked' : checked = '';
+                    return '<input type="checkbox" name="status" value="'+e.status+'" id="'+e.id+'" lay-skin="switch" lay-text="开启|关闭" lay-filter="status" '+checked+'>';
+                }},
+                {title:'操作', width:92, toolbar:'#tool-html'}
+            ]],
+        });
+        layui.table.on('toolbar(admin)', function(obj){
+            app.basic._isNode(this.getAttribute('access-id'), function(){
+                // 添加
+                if(obj.event == 'add'){
+                    modal({
+                        "title":"添加",
+                        "filter":"add",
+                        "file":"system/admin-modal",
+                        "width":"30%",
+                        "height":"330px"
+                    });
+                    layui.form.on('submit(add)', function(data){
+                        data.field.password = app.handle._md5(data.field.password);
+                        app.basic._ajax('admin.php/System/adminAdd', data.field, function(){
+                            app.lay._tableReload('添加成功','admin');
+                        });
+                    });
+                }
+                // 编辑
+                if(obj.event == 'edit'){
+                    var data = layui.table.checkStatus('admin').data;
+                    if(data.length != 1){
+                        layui.layer.msg('请确认操作对象', {icon: 5});
+                    }else if(data[0].id == 1){
+                        layui.layer.msg('禁止编辑超级管理员', {icon: 5});
+                    }else{
+                        modal({
+                            "title":"编辑",
+                            "filter":"edit",
+                            "file":"system/admin-modal",
+                            "width":"30%",
+                            "height":"330px",
+                            data:data[0]
+                        });
+                        layui.form.on('submit(edit)', function(data){
+                            if(data.field.password != document.querySelector('input[lay-than="password"]').getAttribute('this-pwd')){
+                                data.field.password = app.handle._md5(data.field.password);
+                            }
+                            app.basic._ajax('admin.php/System/adminEdit', data.field, function(){
+                                app.lay._tableReload('更新成功','admin');
+                            });
+                        });
+                    }
+                }
+                // 删除
+                if(obj.event == 'del'){
+                    var data = layui.table.checkStatus('admin').data, state = '';
+                    if(data.length < 1) state = '请确认操作对象';
+                    var ids = data.map(function(el){
+                        if(el.id == 1) state = '禁止删除超级管理员';
+                        return +el.id;
+                    });
+                    if(state){
+                       layui.layer.msg(state, {icon: 5});
+                    }else{
+                        app.lay._confirm('确认删除么？', function(){
+                            app.basic._ajax('admin.php/System/adminDel', {'ids':ids}, function(){
+                                app.lay._tableReload('删除成功','admin');
+                            });
+                        });
+                    }
+                }
+            });
+        });
+        // 状态
+        layui.form.on('switch(status)', function(obj){
+            var _that = this;
+            app.basic._isNode(app.o(this).attr('access-id'), function(){
+                (parseInt(_that.value) == 0)? status = 1 : status = 0;
+                var data = {'id':_that.id, 'status':status};
+                app.basic._ajax('admin.php/System/adminStatus', data, function(){
+                    app.lay._tableReload('操作成功','admin');
+                });
+            });
+        });
+        layui.table.on('tool(admin)', function(obj){
+            app.basic._isNode(this.getAttribute('access-id'), function(){
+                sessionStorage.setItem('calldata',JSON.stringify(obj.data));
+                // 管理仓库
+                if(obj.event == 'library'){
+                    app.basic._getPage('system/admin-library', 'library', function(html){
+                        layui.layer.open({
+                            type:1, maxmin:true, title:'管理仓库', area:['30%','382px'], content:html
+                        });
+                    });
+                }
+            });
+        });
+        // 打开窗口
+        function modal(param){
+            app.lay._layer(param.title, param.filter, param.file, function(){
+                if(param.filter == 'edit'){
+                    // 角色获取 选中当前角色
+                    roleGet(param.data.role_id);
+                    // 赋值
+                    layui.form.val('form', {'id':param.data.id, 'account':param.data.account, 'password':param.data.password});
+                    // 赋值确认密码
+                    var obj_pwd = document.querySelector('input[lay-than="password"]');
+                    obj_pwd.value = param.data.password;
+                    obj_pwd.getAttribute('this-pwd', param.data.password);
+                }else{
+                    // 角色获取
+                    roleGet();
+                }
+            }, param.width, param.height);
+        }
+        // 角色获取
+        function roleGet(role_id){
+            app.basic._ajax('admin.php/System/roleGet', '', function(result){
+                var option = '';
+                result.data.forEach(function(el, i){
+                    option += '<option value="'+el.id+'">'+el.name+'</option>'
+                });
+                document.querySelector('select[name="role_id"]').innerHTML = '<option value="">请分配用户角色</option>'+option;
+                if(role_id) layui.form.val('form', {'role_id':role_id});
+                layui.form.render('select');
+            });
+        }
+    });
+</script>

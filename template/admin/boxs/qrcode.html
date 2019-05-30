@@ -1,0 +1,42 @@
+<div style="padding: 15px;">
+    <div class="layui-hide" id="qrcode" lay-filter="qrcode"></div>
+    <script type="text/html" id="toolbar-html">
+        <button class="layui-btn layui-btn-sm layui-btn-primary" data-event="download" download="">下载二维码</button>
+    </script>
+</div>
+<script>
+    layui.config({
+        base: '/'
+    }).use(['app','table'], function(){
+        var app = layui.app,
+            boxsData = layui.table.checkStatus('boxs').data;
+        // 列表
+        layui.table.render({
+            elem: '#qrcode',
+            toolbar: '#toolbar-html',
+            data: boxsData,
+            page: {layout: ['count', 'prev', 'page', 'next'],limit: 10},
+            cols: [[
+                {field:'name', title:'盒子名称'},
+                {title:'二维码',templet:function(e){
+                    return '<a href="'+e.original_qrcode+'" download="'+e.name+'"><img src="'+e.original_qrcode+'"></a>'
+                }}
+            ]]
+        });
+        // 下载二维码
+        app.o('div[lay-id="qrcode"] button[data-event="download"]').click(function(){
+            var img = document.querySelectorAll('div[lay-id="qrcode"] .layui-table-body img');
+            for(var i of img){
+                download(i.getAttribute('src'));
+            }
+        });
+        function download(src) {
+            var $a = document.createElement('a');
+            $a.setAttribute("href", src);
+            $a.setAttribute("download", "");
+            var evObj = document.createEvent('MouseEvents');
+            evObj.initMouseEvent( 'click', true, true, window, 0, 0, 0, 0, 0, false, false, true, false, 0, null);
+            $a.dispatchEvent(evObj);
+        };
+    });
+</script>

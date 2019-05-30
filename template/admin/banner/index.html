@@ -1,0 +1,131 @@
+<div class="layui-card">
+    <div class="layui-tab layui-tab-brief">
+        <ul class="layui-tab-title">
+            <li class="layui-this">广告管理</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <div class="layui-hide" id="banner" lay-filter="banner"></div>
+                <script type="text/html" id="status-html">
+                    <input type="checkbox" name="status" value="{{d.status}}" id="{{d.id}}" lay-skin="switch"
+                           lay-text="开启|关闭" lay-filter="status" {{(!d.status)? 'checked' : ''}}>
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.config({
+        base: '/'
+    }).use(['app', 'table'], function () {
+        var app = layui.app;
+
+        // 列表
+        layui.table.render({
+            elem: '#banner',
+            toolbar: true,
+            url: 'admin.php/Advert/adverts?route=' + location.hash.substring(1),
+            page: {layout: ['count', 'prev', 'page', 'next'], limit: 10},
+            done: function (res) {
+                app.basic._nodes(res.other);
+            },
+            cols: [[
+                {type:'checkbox'},
+                {field: 'name', title: '名称'},
+                {
+                    field: 'url', title: '图片', align: 'center', templet: function (e) {
+                        (!e.url) ? url = '<i class="layui-icon layui-icon-picture"></i>' : url = '<img src="' + e.url + '" />';
+                        return url;
+                    }
+                },
+                {field: 'path', title: '链接'},
+                {field: 'position', title: '显示位置'},
+                {
+                    field: 'is_show', title: '显示状态', templet: function (e) {
+                        return e.is_show == 1?'显示':'不显示';
+                    }
+                },
+                {field: 'time', title: '添加时间'},
+                {field: 'id', title: 'id'}
+            ]],
+        });
+        layui.table.on('toolbar(banner)', function (obj) {
+            app.basic._isNode(this.getAttribute('access-id'), function () {
+                // 添加
+                if (obj.event == 'add') {
+                    modal({
+                        "title": "添加",
+                        "filter": "add",
+                        "file": "banner/banner-modal",
+                        "width": "30%",
+                        "height": "600px"
+                    });
+
+                    layui.form.on('submit(add)', function (data) {
+                        app.basic._ajax('admin.php/Advert/add', data.field, function () {
+                            app.lay._tableReload('添加成功', 'banner');
+                        });
+                    });
+
+                }
+                // 编辑
+                if (obj.event == 'edit'){
+                    var data = layui.table.checkStatus('banner').data;
+                    if(data.length !== 1){
+                        layui.layer.msg('请确认操作对象', {icon: 5});
+                    }else{
+                        modal({
+                            "title": "编辑",
+                            "filter": "edit",
+                            "file": "banner/banner-modal",
+                            "width": "30%",
+                            "height": "420px",
+                            "data": data[0]
+                        });
+                        layui.form.on('submit(edit)', function(data){
+                            app.basic._ajax('admin.php/Advert/advertEdit', data.field,function(){
+                                app.lay._tableReload('更新成功','banner');
+                            });
+                        });
+                    }
+                }
+                // 删除
+                if (obj.event == 'del') {
+                    var data = layui.table.checkStatus('banner').data;
+                    if(data.length < 1){
+                        layui.layer.msg('请确认操作对象', {icon: 5});
+                    }else{
+                        var ids = data.map(function(el){
+                            return +el.id;
+                        });
+                        app.lay._confirm('确认删除么？', function(){
+                            app.basic._ajax('admin.php/Advert/advertDel', {'ids':ids}, function(){
+                                app.lay._tableReload('删除成功','banner');
+                            });
+                        });
+                    }
+                }
+            });
+        });
+
+        // 打开窗口
+        function modal(param) {
+            var data = param.data;
+            app.lay._layer(param.title, param.filter, param.file, function () {
+                app.lay._uploads('url', 'admin.php/Common/uploads');
+
+                if(param.filter === 'edit'){
+                    layui.form.val('form',{
+                        "id":data.id, "name":data.name, "type":data.type, "url":data.url,
+                        "path":data.path, position: data.position, is_show: (data.is_show =='显示'?1:0)
+                    });
+
+                    document.querySelector("input[name='is_show'][value='1']").setAttribute("checked", (data.is_show ===1 ? true : false));
+                    document.querySelector("input[name='is_show'][value='0']").setAttribute("checked", data.is_show === 0 ? true : false);
+                    layui.form.render(); //更新全部
+                }
+
+            }, param.width, param.height);
+        }
+    });
+</script>

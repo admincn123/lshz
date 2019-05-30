@@ -1,0 +1,76 @@
+<?php
+    define('PAGE_TITLE','登录');
+    define('BODY_CLASS','login-body');
+?>
+{include file="common/header" /}
+    <form class="layui-form layui-form-pane">
+        <blockquote class="layui-elem-quote layui-text" style="border-left-color: #1E9FFF">后台登录</blockquote>
+        <div class="layui-col-md12">
+            <div class="layui-form-item">
+                <label class="layui-form-label"><i class="layui-icon layui-icon-username"></i> 账&nbsp;&nbsp;&nbsp;&nbsp;号</label>
+                <div class="layui-input-block">
+                    <input type="text" name="account" lay-verify="account" lay-verType="tips" placeholder="请输入账号，3-16位字母或数字组成" autocomplete="off" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-md12">
+            <div class="layui-form-item">
+                <label class="layui-form-label"><i class="layui-icon layui-icon-password"></i> 密&nbsp;&nbsp;&nbsp;&nbsp;码</label>
+                <div class="layui-input-block">
+                    <input type="password" name="password" lay-verify="password" lay-verType="tips" placeholder="请输入密码，3-16位字母或数字组成" class="layui-input">
+                </div>
+            </div>
+        </div>
+        <div class="layui-col-md12">
+            <div class="layui-form-item">
+                <label class="layui-form-label"><i class="layui-icon layui-icon-vercode"></i> 验证码</label>
+                <div class="layui-input-block">
+                    <div class="layui-col-md7 layui-col-xs7">
+                        <input type="text" lay-verify="code" lay-verType="tips" placeholder="请输入验证码" maxlength="4" autocomplete="off" class="layui-input">
+                    </div>
+                    <div class="layui-col-md5 layui-col-xs5">
+                        <button class="layui-form-label layui-form-company code" type="button">0000</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="layui-col-md12 layer-btn-box">
+            <div class="layui-form-item">
+                <a href="javascript:;" class="layui-btn layui-show layui-btn-normal" lay-filter="sign" lay-submit="">立即登录</a>
+            </div>
+        </div>
+    </form>
+    <script>
+        layui.config({
+            base: '/'
+        }).use(['app'], function(){
+            var app   = layui.app;
+            // 验证码
+            var obj_code = document.querySelector('.code');
+            obj_code.innerHTML = app.basic._getCode(4);
+            obj_code.addEventListener('click', function(){
+                obj_code.innerHTML = app.basic._getCode(4);
+            });
+            // 登录
+            layui.form.on('submit(sign)', function(data){
+                data.field.password = app.handle._md5(data.field.password);
+                app.basic._ajax('admin.php/Logreg/sign', data.field, function(result){
+                    sessionStorage.setItem('account',result.data.account);
+                    sessionStorage.setItem('sign_datetime',result.data.sign_datetime);
+                    sessionStorage.setItem('sign_ip',result.data.sign_ip);
+                    // 存入版本信息
+                    sessionStorage.setItem('SERVER_SOFTWARE',"<?php echo $_SERVER['SERVER_SOFTWARE'];?>");
+                    sessionStorage.setItem('PHP_VERSION',"<?php echo PHP_VERSION; ?>");
+                    app.route._jump('登录成功','admin.php');
+                });
+            });
+            document.onkeydown = function (event){
+                var e = event || window.event;
+                if (e && e.keyCode == 13) {
+                    document.querySelector('a[lay-filter="sign"]').click();
+                }
+            };
+        });
+    </script>
+{include file="common/footer" /}

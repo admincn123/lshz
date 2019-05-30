@@ -1,0 +1,131 @@
+<form class="layui-form layui-form-pane" lay-filter="form">
+    <input name="id" type="hidden">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">选择区分</label>
+                    <div class="layui-input-block">
+                        <div class="layui-unselect layui-form-select tree">
+                            <div class="layui-select-title">
+                                <input placeholder="请选择区分" class="layui-input layui-unselect" readonly="" type="text">
+                                <input name="area_id" lay-verify="notempty" placeholder="请选择区分" type="hidden">
+                                <i class="layui-edge"></i>
+                            </div>
+                            <dl class="layui-anim layui-anim-upbit">
+                                <dd lay-value="" class="layui-select-tips">请选择区分</dd>
+                                <dd id="boxs_list"></dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">生成个数</label>
+                    <div class="layui-input-block">
+                        <input type="number" name="number" lay-verify="notempty" lay-verType="tips" placeholder="请输入生成盒子个数" autocomplete="off" class="layui-input" onkeyup="if(this.value<1){this.value=null;}if(this.value>51){this.value=50}">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-form-item layui-form-text">
+                    <label class="layui-form-label">盒子说明</label>
+                    <div class="layui-input-block">
+                        <textarea name="message" lay-verify="" class="layui-textarea" placeholder="请输入盒子说明" style="resize: none;"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">盒子通知</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="notification" lay-verify="" lay-verType="tips" placeholder="请输入盒子通知" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">手机号</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="phone" lay-verify="" lay-verType="tips" placeholder="请输入手机号" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">微信号</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="wechat" lay-verify="" lay-verType="tips" placeholder="请输入微信号" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="layui-col-md12 layer-btn-box">
+                <div class="layui-form-item">
+                    <button type="reset" class="layui-btn layui-btn-sm layui-btn-primary layui-layer-close" >取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    layui.config({
+        base: '/'
+    }).use(['app'], function(){
+        var app = layui.app;
+
+        // 分区列表
+        app.basic._ajax('admin.php/Boxs/area','',function(result){
+            var checkedIds = [];
+            checkedIds.push(parseInt(sessionStorage.getItem('checked')));
+            app.Tree.render({
+                elem:'#boxs_list',
+                is_checkbox:false,
+                is_radio_last:true,
+                data:result.data,
+                icon_key:'name',
+                cols:[{key:'name',title:'名称'}],
+                checked:{key:'id',data:checkedIds},
+                end:function(){sessionStorage.removeItem('checked');}
+            });
+        });
+
+        // 添加
+        layui.form.on('submit(add)', function(data){
+            var data = pretreatment(data.field);
+            app.basic._ajax('admin.php/Boxs/boxsAdd', {"data":data}, function(){
+                app.lay._tableReload('添加成功','boxs');
+            },'msg');
+        });
+        // 编辑
+        layui.form.on('submit(edit)', function(data){
+            app.basic._ajax('admin.php/Boxs/boxsEdit', data.field, function(){
+                app.lay._tableReload('更新成功','boxs');
+            });
+        });
+        if(parseInt(sessionStorage.getItem('checked'))){
+            app.o('#boxs-modal').find('input[name="number"]').parents('.layui-col-md12').remove();
+        }
+        // 数据预处理
+        function pretreatment(data){
+            var dataArr = [], nameBase = 1, boxs = layui.table.cache.boxs;
+            if(boxs) nameBase = boxs[0]['id']+1;
+            for(var i=0; i<data.number; i++){
+                var line = {
+                    "name":'iBox-'+parseInt(nameBase+i),
+                    "original_qrcode":app.conf.serverPath+'api/public/uploads/images/iBox-'+parseInt(nameBase+i)+'.png',
+                    "tailor_qrcode":app.conf.serverPath+'api/public/uploads/images/iBox-'+parseInt(nameBase+i)+'-bg.png',
+                    "area_id":data.area_id,
+                    "message":data.message,
+                    "notification":data.notification,
+                    "phone":data.phone,
+                    "wechat":data.wechat,
+                    "time":app.handle._timeToDate(app.handle._curTime(),'Y-m-d H:i:s')
+                };
+                dataArr.push(line);
+            }
+            return dataArr;
+        }
+    });
+</script>

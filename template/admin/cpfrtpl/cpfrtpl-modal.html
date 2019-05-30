@@ -1,0 +1,29 @@
+<form class="layui-form layui-form-pane" lay-filter="form">
+    <input type="hidden" name="id">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">模板名称</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="name" lay-verify="notempty" lay-verType="tips" placeholder="请输入模板名称" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-form-item-box">
+                    <div class="header">选择商品</div>
+                    <div class="body">
+                        <div class="layui-hide" id="goods" lay-filter="goods"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-col-md12 layer-btn-box">
+                <div class="layui-form-item">
+                    <button type="reset" class="layui-btn layui-btn-sm layui-btn-primary layui-layer-close" >取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

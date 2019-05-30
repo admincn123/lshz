@@ -1,0 +1,49 @@
+<div class="layui-card">
+    <div class="layui-tab layui-tab-brief">
+        <ul class="layui-tab-title">
+            <li class="layui-this">公告管理</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <form class="layui-form" action="">
+                    <div class="layui-form-item layui-form-text">
+                        <label class="layui-form-label">公告内容</label>
+                        <div class="layui-input-block">
+                            <textarea id="content" name="content" placeholder="请输入公告内容" class="layui-textarea"></textarea>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="placard-form">保存</button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.config({
+        base: '/'
+    }).use(['app', 'table'], function () {
+        var app = layui.app;
+
+        app.basic._ajax('admin.php/Placard/first', null, function (res) {
+           if(res.data){
+               document.querySelector('#content').value = res.data.content;
+           }
+        });
+
+        layui.form.on('submit(placard-form)', function (data) {
+            app.basic._ajax('admin.php/Placard/save', data.field, function (res) {
+                if(res.code === 0){
+                    layui.layer.msg('保存成功', {icon: 1});
+                }else{
+                    layui.layer.msg('保存失败', {icon: 2});
+                }
+            });
+            return false;
+        });
+    });
+</script>

@@ -1,0 +1,95 @@
+<div class="layui-card">
+    <div class="layui-tab layui-tab-brief">
+        <ul class="layui-tab-title">
+            <li class="layui-this">订单管理</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <form class="layui-form table-search-box">
+                    <div class="layui-inline">
+                        <input type="text" id="date" name="" class="layui-input" placeholder="请选择时间段">
+                    </div>
+                    <button type="button" lay-filter="search" lay-submit="" class="layui-btn layui-btn-sm layui-btn-normal">
+                        <i class="layui-icon layui-icon-search"></i> 搜索
+                    </button>
+                </form>
+                <div class="layui-hide" id="order" lay-filter="order"></div>
+                <script type="text/html" id="status-html">
+                    <input type="checkbox" name="status" value="{{d.status}}" id="{{d.id}}" lay-skin="switch" lay-text="支付|未支付" lay-filter="status" {{(!d.status)? 'checked' : ''}}>
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.config({
+        base: '/'
+    }).use(['app','table','laydate'], function(){
+        var app = layui.app;
+
+        //
+        var start_date = '';
+        var end_date = '';
+        layui.laydate.render({
+            elem:'#date', range:'至',
+            done: function (value, startDate, endDate) {
+                if(startDate.year && startDate.month && startDate.date){
+                    start_date = startDate.year + '-'+startDate.month+'-'+startDate.date;
+                }
+                if(endDate.year && endDate.month && endDate.date){
+                    end_date = endDate.year + '-'+endDate.month+'-'+endDate.date;
+                }
+            }
+        });
+
+        // 列表
+        layui.table.render({
+            elem: '#order',
+            toolbar: true,
+            url: 'admin.php/Order/orders?route='+location.hash.substring(1),
+            page: {layout: ['count', 'prev', 'page', 'next'],limit: 10},
+            done: function(res){app.basic._nodes(res.other);},
+            cols: [[
+                {type:'checkbox'},
+                {field:'order_number', title:'订单号'},
+                {field:'goods_names', title:'商品名称'},
+                {field:'goods_total_money', title:'订单金额'},
+                {field:'time', title: '下单时间'},
+                {field:'nickname', title:'下单人'},
+                {field:'agent_name', title:'代理人'},
+                {field:'box_name', title:'盒子名称'},
+                {field:'status_text', title:'订单状态'},
+                {field:'id', title: 'id'}
+            ]],
+        });
+
+        // 搜索
+        layui.form.on('submit(search)', function(data){
+            layui.table.reload('order', {
+                page: {curr: 1},
+                where: {start_date: (start_date?start_date:''), end_date: (end_date?end_date:'')}
+            });
+        });
+
+        layui.table.on('toolbar(order)', function(obj){
+            app.basic._isNode(this.getAttribute('access-id'), function(){
+                // 删除
+                if(obj.event == 'del'){
+                    var data = layui.table.checkStatus('order').data;
+                    if(data.length < 1){
+                        layui.layer.msg('请确认操作对象', {icon: 5});
+                    }else{
+                        var ids = data.map(function(el){
+                            return +el.id;
+                        });
+                        app.lay._confirm('确认删除么？', function(){
+                            app.basic._ajax('admin.php/Order/orderDel', {'ids':ids}, function(){
+                                app.lay._tableReload('删除成功','order');
+                            });
+                        });
+                    }
+                }
+            });
+        });
+    });
+</script>

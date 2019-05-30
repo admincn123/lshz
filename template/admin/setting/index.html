@@ -1,0 +1,168 @@
+<div class="layui-card">
+    <div class="layui-tab layui-tab-brief">
+        <ul class="layui-tab-title">
+            <li class="layui-this">公告管理</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <form class="layui-form" action="">
+
+                    <div class="layui-card">
+                        <div class="layui-card-header">微信公众号</div>
+                        <div class="layui-card-body">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label ">微信公众号openid</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="wx_open_id" placeholder="请输入微信公众号openid" autocomplete="off"
+                                           class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">微信公众号app_secret</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="wx_app_secret" placeholder="请输入微信公众号app_secret" autocomplete="off"
+                                           class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">微信公众号授权地址</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="wx_redirect_uri" placeholder="请输入微信公众号授权地址" autocomplete="off"
+                                           class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">微信公众号token</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="wx_token" placeholder="请输入微信公众号token" autocomplete="off"
+                                           class="layui-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="layui-card">
+                        <div class="layui-card-header">微信商户平台</div>
+                        <div class="layui-card-body">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">微信商户平台号</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="wx_mchid" placeholder="请输入微信商户平台号" autocomplete="off"
+                                           class="layui-input">
+                                </div>
+                            </div>
+
+                            <div class="layui-form-item layui-form-text">
+                                <label class="layui-form-label">微信商户平台秘钥</label>
+                                <div class="layui-input-block">
+                                    <textarea name="wx_key" placeholder="请输入微信商户平台秘钥" class="layui-textarea"></textarea>
+                                </div>
+                            </div>
+
+
+                            <div class="layui-form-item layui-form-text">
+                                <label class="layui-form-label">微信商户平台支付证书cert</label>
+                                <div class="layui-input-block">
+                            <textarea name="wx_apiclient_cert" placeholder="请输入微信商户平台支付证书cert"
+                                      class="layui-textarea"></textarea>
+                                </div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">微信商户平台支付证书key</label>
+                                <div class="layui-input-block">
+                            <textarea type="text" name="wx_apiclient_key" placeholder="请输入微信商户平台支付证书key" autocomplete="off"
+                                      class="layui-textarea"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="layui-card">
+                        <div class="layui-card-header">微信商小程序</div>
+                        <div class="layui-card-body">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">小程序appid</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="mini_appid" placeholder="请输入小程序appid" autocomplete="off"
+                                           class="layui-input">
+                                </div>
+                            </div>
+
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">小程序app_secret</label>
+                                <div class="layui-input-block">
+                                    <input type="text" name="mini_app_secret" placeholder="请输入小程序app_secret" autocomplete="off"
+                                           class="layui-input">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="layui-card">
+                        <div class="layui-card-header">其他设置</div>
+                        <div class="layui-card-body">
+                            <div class="layui-form-item-box" id="logo">
+                                <div class="header">
+                                    <button type="button" class="layui-btn layui-btn-sm layui-btn-normal">公司logo</button>
+                                    <input type="hidden" name="logo" lay-verify="" placeholder="请上传公司logo">
+                                </div>
+                                <div class="body">
+                                    <div class="tips"></div>
+                                    <div class="body-view"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <div class="layui-input-block">
+                            <button class="layui-btn layui-btn-normal" lay-submit lay-filter="setting-form">立即提交</button>
+                        </div>
+                    </div>
+                </form>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.config({
+        base: '/'
+    }).use(['app', 'table'], function () {
+        var app = layui.app;
+
+        app.lay._uploads('logo', 'admin.php/Common/uploads');
+
+        app.basic._ajax('admin.php/Setting/data', null, function (res) {
+            if (res.data) {
+                document.querySelector('input[name="wx_open_id"]').value = res.data.wx_open_id;
+                document.querySelector('input[name="wx_app_secret"]').value = res.data.wx_app_secret;
+                document.querySelector('input[name="wx_redirect_uri"]').value = res.data.wx_redirect_uri;
+                document.querySelector('input[name="wx_token"]').value = res.data.wx_token;
+                document.querySelector('input[name="wx_mchid"]').value = res.data.wx_mchid;
+                document.querySelector('textarea[name="wx_key"]').value = res.data.wx_key;
+                document.querySelector('textarea[name="wx_apiclient_cert"]').value = res.data.wx_apiclient_cert;
+                document.querySelector('textarea[name="wx_apiclient_key"]').value = res.data.wx_apiclient_key;
+                document.querySelector('input[name="mini_appid"]').value = res.data.mini_appid;
+                document.querySelector('input[name="mini_app_secret"]').value = res.data.mini_app_secret;
+                document.querySelector('input[name="logo"]').value = res.data.logo;
+                if(res.data.logo){
+                    document.querySelector('.body-view').innerHTML = '<a href="'+res.data.logo+'" target="_blank"><img class="file" src="'+res.data.logo+'"></a>'
+                }
+            }
+        });
+
+        layui.form.on('submit(setting-form)', function (data) {
+            app.basic._ajax('admin.php/Setting/save', data.field, function (res) {
+                if (res.code === 0) {
+                    layui.layer.msg('保存成功', {icon: 1});
+                } else {
+                    layui.layer.msg('保存失败', {icon: 2});
+                }
+            });
+            return false;
+        });
+    });
+</script>

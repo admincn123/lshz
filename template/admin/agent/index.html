@@ -1,0 +1,123 @@
+<div class="layui-card">
+    <div class="layui-tab layui-tab-brief">
+        <ul class="layui-tab-title">
+            <li class="layui-this">代理管理</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <form class="layui-form table-search-box">
+                    <div class="layui-inline">
+                        <input name="keyword" autocomplete="off" placeholder="请输入手机号或用户名" class="layui-input" type="text">
+                    </div>
+                    <button type="button" lay-filter="search" lay-submit="" class="layui-btn layui-btn-sm layui-btn-normal">
+                        <i class="layui-icon layui-icon-search"></i> 搜索
+                    </button>
+                </form>
+                <div class="layui-hide" id="agent" lay-filter="agent"></div>
+
+                <script type="text/html" id="boxs-html">{{ d.boxs.length }}</script>
+                <script type="text/html" id="tool-html">
+                    <a lay-event="settle" class="layui-btn layui-btn-primary layui-btn-xs">结账操作</a>
+                    <a lay-event="settlelog" class="layui-btn layui-btn-primary layui-btn-xs">结账记录</a>
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.config({
+        base: '/'
+    }).use(['app','table'], function(){
+        var app = layui.app;
+
+        // 列表
+        layui.table.render({
+            elem: '#agent',
+            toolbar: true,
+            url: 'admin.php/Agent/agent?route='+location.hash.substring(1),
+            page: {layout: ['count', 'prev', 'page', 'next'],limit: 10},
+            done: function(res){app.basic._nodes(res.other);},
+            cols: [[
+                {type:'checkbox'},
+                {field:'name', title:'姓名'},
+                {field:'account', title:'账号'},
+                {field:'phone', title:'手机号'},
+                {title:'盒子数量', templet:'#boxs-html'},
+                {field:'money', title: '销售总额'},
+                {field:'time', title:'开通时间'},
+                {title:'操作', toolbar:'#tool-html', width:168},
+                {field:'id', title: 'id'}
+            ]]
+        });
+        // 搜索
+        layui.form.on('submit(search)', function(data){
+            layui.table.reload('agent', {
+                page: {curr: 1},
+                where: {keyword: data.field.keyword}
+            });
+        });
+        // 表头操作
+        layui.table.on('toolbar(agent)', function(obj){
+            app.basic._isNode(this.getAttribute('access-id'), function(){
+                // 添加
+                if(obj.event == 'add'){
+                    app.basic._getPage('agent/agent-modal', 'add', function(html){
+                        layui.layer.open({
+                            type:1, maxmin:true, title:'添加', area:['30%','382px'], content:html,
+                        });
+                    });
+                }
+                // 编辑
+                if(obj.event == 'edit'){
+                    var data = layui.table.checkStatus('agent').data;
+                    if(data.length != 1){
+                        layui.layer.msg('请确认操作对象', {icon: 5});
+                    }else{
+                        app.basic._getPage('agent/agent-modal', 'edit', function(html){
+                            layui.layer.open({
+                                type:1, maxmin:true, title:'添加', area:['30%','382px'], content:html,
+                            });
+                        });
+                    }
+                }
+                // 删除
+                if(obj.event == 'del'){
+                    var data = layui.table.checkStatus('agent').data;
+                    if(data.length < 1){
+                        layui.layer.msg('请确认操作对象', {icon: 5});
+                    }else{
+                        var ids = data.map(function(el){
+                            return +el.id;
+                        });
+                        app.lay._confirm('确认删除么？', function(){
+                            app.basic._ajax('admin.php/Agent/agentDel', {'ids':ids}, function(){
+                                app.lay._tableReload('删除成功','agent');
+                            });
+                        });
+                    }
+                }
+            });
+        });
+        // 列表操作
+        layui.table.on('tool(agent)', function(obj){
+            app.basic._isNode(this.getAttribute('access-id'), function(){
+                app.basic._toolCheck(obj);
+                // 结账操作
+                if(obj.event == 'settle'){
+                    app.basic._getPage('agent/settle', 'settle', function(html){
+                        layui.layer.open({
+                            type:1, maxmin:true, title:'结账操作', area:['30%','332px'], content:html,
+                        });
+                    });
+                }
+                if(obj.event == 'settlelog'){
+                    app.basic._getPage('agent/settlelog', false, function(html){
+                        layui.layer.open({
+                            type:1, maxmin:true, title:'结账操作', area:['60%','632px'], content:html,
+                        });
+                    });
+                }
+            });
+        });
+    });
+</script>

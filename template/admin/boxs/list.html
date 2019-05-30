@@ -1,0 +1,163 @@
+<div class="layui-card">
+    <div class="layui-tab layui-tab-brief">
+        <ul class="layui-tab-title">
+            <li class="layui-this">盒子列表</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <form class="layui-form table-search-box">
+                    <div class="layui-inline">
+                        <input type="text" name="goods_total_money" autocomplete="off" class="layui-input" placeholder="请输入补货金额">
+                    </div>
+                    <div class="layui-inline">
+                        <div class="layui-unselect layui-form-select tree">
+                            <div class="layui-select-title">
+                                <input placeholder="请选择分区" class="layui-input layui-unselect" readonly="" type="text">
+                                <input name="area_id" type="hidden">
+                                <i class="layui-edge"></i>
+                            </div>
+                            <dl class="layui-anim layui-anim-upbit">
+                                <dd lay-value="" class="layui-select-tips">请选择分区</dd>
+                                <dd id="area"></dd>
+                            </dl>
+                        </div>
+                    </div>
+                    <div class="layui-inline">
+                        <select name="agent_id">
+                            <option value="">请选择盒子状态</option>
+                            <option value="Y">已分配</option>
+                            <option value="N">未分配</option>
+                            <!-- <option value="B">报废</option> -->
+                        </select>
+                    </div>
+                    <button type="button" lay-filter="search" lay-submit="" class="layui-btn layui-btn-sm layui-btn-normal">
+                        <i class="layui-icon layui-icon-search"></i> 搜索
+                    </button>
+                </form>
+                <div class="layui-hide" id="boxs" lay-filter="boxs"></div>
+                <script type="text/html" id="tool">
+                    <a lay-event="stockup" class="layui-btn layui-btn-primary layui-btn-xs">备货</a>
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.config({
+        base: '/'
+    }).use(['app','table'], function(){
+        var app = layui.app;
+
+        // 分区列表
+        app.basic._ajax('admin.php/Boxs/area','',function(result){
+            app.Tree.render({
+                elem:'#area',
+                is_checkbox:false,
+                is_radio_last:true,
+                data:result.data,
+                icon_key:'name',
+                cols:[{key:'name',title:'名称'}]
+            });
+        }, false);
+
+        // 盒子列表
+        layui.table.render({
+            elem: '#boxs',
+            toolbar: true,
+            url: 'admin.php/Boxs/boxs?route='+location.hash.substring(1),
+            page: {layout: ['count', 'prev', 'page', 'next'],limit: 10},
+            done: function(res){app.basic._nodes(res.other);},
+            cols: [[
+                {type: 'checkbox'},
+                {field:'name', title:'盒子名称'},
+                {field:'area_parents', title:'所属分区'},
+                {field:'goods_total_number', title:'商品个数'},
+                {field:'goods_total_money', title: '商品金额'},
+                {title:'状态',templet:function(e){
+                    (e.agent_id)? str = '已分配' : str = '未分配';
+                    return str;
+                }},
+                {title:'操作',toolbar:'#tool',width:68},
+                {field:'id', title: 'id'}
+            ]],
+        });
+        // 搜索
+        layui.form.on('submit(search)', function(data){
+            layui.table.reload('boxs', {
+                page: {curr: 1},
+                where: {keyword: data.field}
+            });
+        });
+
+        layui.table.on('toolbar(boxs)', function(obj){
+            app.basic._isNode(this.getAttribute('access-id'), function(){
+                // 添加
+                if(obj.event == 'add'){
+                    app.lay._layer('添加', 'add', 'boxs/boxs-modal', false, '30%', '536px');
+                }
+                // 编辑
+                if(obj.event == 'edit'){
+                    var data = layui.table.checkStatus('boxs').data;
+                    if(data.length != 1){
+                        layui.layer.msg('请确认操作对象', {icon:5});
+                    }else{
+                        sessionStorage.setItem('checked',data[0].area_id);
+                        app.lay._layer('编辑','edit','boxs/boxs-modal',data[0],'30%','536px','boxs-modal');
+                    }
+                }
+                // 删除
+                if(obj.event == 'del'){
+                    var data = layui.table.checkStatus('boxs').data;
+                    if(data.length < 1){
+                        layui.layer.msg('请确认操作对象', {icon: 5});
+                    }else{
+                        var ids = data.map(function(el){
+                            return +el.id;
+                        });
+                        app.lay._confirm('确认删除么？', function(){
+                            app.basic._ajax('admin.php/Boxs/boxsDel', {'ids':ids}, function(){
+                                app.lay._tableReload('删除成功','boxs');
+                            });
+                        });
+                    }
+                }
+                // 盘点记录
+                if(obj.event == 'inventorylog'){
+                    var data = layui.table.checkStatus('boxs').data;
+                    if(data.length < 1){
+                        layui.layer.msg('请确认操作对象', {icon:5});
+                    }else{
+                        var ids = data.map(function(item){
+                            return +item.id
+                        });
+                        app.lay._layer('盘点记录','inventorylog','boxs/inventorylog',false,'70%','590px');
+                    }
+                }
+                // 交易记录
+                if(obj.event == 'tradelog'){
+                    var data = layui.table.checkStatus('boxs').data;
+                    if(data.length < 1){
+                        layui.layer.msg('请确认操作对象', {icon:5});
+                    }else{
+                        app.lay._layer('交易记录','tradelog','boxs/tradelog',false,'70%','590px');
+                    }
+                }
+                // 二维码
+                if(obj.event == 'qrcode'){
+                    var data = layui.table.checkStatus('boxs').data;
+                    if(data.length < 1){
+                        layui.layer.msg('请确认操作对象', {icon:5});
+                    }else{
+                        app.lay._layer('二维码','qrcode','boxs/qrcode',false,'70%','590px');
+                    }
+                }
+            });
+        });
+        layui.table.on('tool(boxs)', function(obj){
+            // 备货
+            if(obj.event == 'stockup'){
+                app.lay._layer("备货","stockup","boxs/stockup",{"id":obj.data.id},"20%","370px");
+            }
+        });
+    });
+</script>

@@ -1,0 +1,281 @@
+<div class="layui-row layui-col-space15">
+    <div class="layui-col-md8">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-body">
+                        <form class="layui-form">
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <div class="layui-input-inline">
+                                        <div class="layui-unselect layui-form-select tree">
+                                            <div class="layui-select-title">
+                                                <input placeholder="请选择盒子分区" class="layui-input layui-unselect" readonly="" type="text">
+                                                <input name="area_id" type="hidden">
+                                                <i class="layui-edge"></i>
+                                            </div>
+                                            <dl class="layui-anim layui-anim-upbit">
+                                                <dd lay-value="" class="layui-select-tips">请选择盒子分区</dd>
+                                                <dd id="boxs_area"></dd>
+                                            </dl>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md3">
+                <div class="layui-card">
+                    <div class="layui-card-header">今日销售
+                        <span class="layui-badge layui-bg-blue">元</span>
+                    </div>
+                    <div class="layui-card-body main-count today_xs">0.00</div>
+                </div>
+            </div>
+            <div class="layui-col-md3">
+                <div class="layui-card">
+                    <div class="layui-card-header">今日利润
+                        <span class="layui-badge layui-bg-cyan">元</span>
+                    </div>
+                    <div class="layui-card-body main-count today_lr">0.00</div>
+                </div>
+            </div>
+            <div class="layui-col-md3">
+                <div class="layui-card">
+                    <div class="layui-card-header">昨日销售
+                        <span class="layui-badge" style="background: #5FB878">元</span>
+                    </div>
+                    <div class="layui-card-body main-count yesterday_xs">0.00</div>
+                </div>
+            </div>
+            <div class="layui-col-md3">
+                <div class="layui-card">
+                    <div class="layui-card-header">昨日利润
+                        <span class="layui-badge layui-bg-orange">元</span>
+                    </div>
+                    <div class="layui-card-body main-count yesterday_lr">0.00</div>
+                </div>
+            </div>
+            <div class="layui-col-md3">
+                <div class="layui-card">
+                    <div class="layui-card-header">总销售
+                        <span class="layui-badge">元</span>
+                    </div>
+                    <div class="layui-card-body main-count total_xs">0.00</div>
+                </div>
+            </div>
+            <div class="layui-col-md3">
+                <div class="layui-card">
+                    <div class="layui-card-header">总利润
+                        <span class="layui-badge layui-bg-green">元</span>
+                    </div>
+                    <div class="layui-card-body main-count total_lr">0.00</div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-header">月销售额/月利润</div>
+                    <div class="layui-card-body">
+                         <div id="month_order" style="height: 295px;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-header">盒子剩余商品</div>
+                    <div class="layui-card-body">
+                        <div class="layui-hide" id="sysp"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-header">商品销沉比统计</div>
+                    <div class="layui-card-body">
+                        <div class="layui-hide" id="spcxb"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-header">盒子销售金额排行统计</div>
+                    <div class="layui-card-body">
+                        <div class="layui-hide" id="xstj"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-col-md4">
+        <div class="layui-card">
+            <div class="layui-card-header">系统信息</div>
+            <div class="layui-card-body">
+                <div class="layui-row layui-col-space15">
+                    <div class="layui-col-md4">运行环境</div>
+                    <div class="layui-col-md8 server_software">--</div>
+                </div>
+                <hr class="layui-bg-gray">
+                <div class="layui-row layui-col-space15">
+                    <div class="layui-col-md4">PHP版本</div>
+                    <div class="layui-col-md8 php_version">--</div>
+                </div>
+                <hr class="layui-bg-gray">
+                <div class="layui-row layui-col-space15">
+                    <div class="layui-col-md4">系统当前版本</div>
+                    <div class="layui-col-md8">v1.0.0</div>
+                </div>
+                <hr class="layui-bg-gray">
+                <div class="layui-row layui-col-space15">
+                    <div class="layui-col-md4">技术支持</div>
+                    <div class="layui-col-md8">高辉网络科技有限公司</div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-card">
+            <div class="layui-card-header">登录日志</div>
+            <div class="layui-card-body">
+                <script type="text/html" id="toolbar">
+                    <button class="layui-btn layui-btn-sm layui-btn-primary" lay-event="sign-log-del">清除前100条</button>
+                </script>
+                <div class="layui-hide" id="sign-log" lay-filter="sign-log"></div>
+                <script type="text/html" id="status-html">
+                    {{# if(!d.status){ }}
+                        <span class="layui-badge layui-bg-green">正常</span>
+                    {{# }else{ }}
+                        <span class="layui-badge layui-bg-orange">异常</span>
+                    {{# } }}
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="/static/plugin/echarts/echarts.common.min.js"></script>
+<script>
+    layui.config({
+        base: '/'
+    }).use(['app','table','echarts'], function(){
+        var app = layui.app;
+
+        // 盒子区域列表
+        app.basic._ajax('admin.php/Boxs/area', false, function(result){
+            var checkedIds = [];
+            checkedIds.push(parseInt(sessionStorage.getItem('checked')));
+            app.Tree.render({
+                elem:'#boxs_area',
+                is_checkbox:false,
+                data:result.data,
+                icon_key:'name',
+                cols:[{key:'name',title:'名称'}]
+            });
+            layui.form.render();
+        });
+        countAll();
+        // 选择区域
+        app.o('.tree').on('click', '#boxs_area ul', function(){
+            var area_id = app.o('.tree input[name="area_id"]').val();
+            countAll(area_id);
+        });
+        // 清除盒子分区条件
+        app.o('.tree .layui-select-tips').click(function(){
+            countAll();
+        });
+        function countAll(area_id){
+            app.basic._ajax('admin.php/Main/countAll', {"area_id":area_id}, function(result){
+                // 订单统计
+                var order = result.data.order;
+                document.querySelector('.today_xs').innerText = order.today_xs;
+                document.querySelector('.today_lr').innerText = order.today_lr;
+                document.querySelector('.yesterday_xs').innerText = order.yesterday_xs;
+                document.querySelector('.yesterday_lr').innerText = order.yesterday_lr;
+                document.querySelector('.total_xs').innerText = order.total_xs;
+                document.querySelector('.total_lr').innerText = order.total_lr;
+                // 月订单
+                var month_order = result.data.month_order;
+                app.echarts._line('month_order', '日期', month_order.date, '金额（元）', [month_order.xs, month_order.lr]);
+                // 盒子剩余商品
+                layui.table.render({
+                    elem:'#sysp', toolbar:true, data:result.data.sysp,
+                    page:{
+                        layout: ['count', 'prev', 'page', 'next'],
+                        limit: 10
+                    },
+                    cols: [[
+                        {field:'stock', title:'数量（件）'},
+                        {title:'进货价（元）', templet:function(d){
+                            return d.jh_price.toFixed(2);
+                        }},
+                        {title:'零售价（元）', templet: function(d){
+                            return d.price.toFixed(2);
+                        }},
+                        {title:'利润求和（元）', templet: function(d){
+                            return d.lr_sum.toFixed(2);
+                        }}
+                    ]]
+                });
+                // 商品沉销比
+                layui.table.render({
+                    elem:'#spcxb', toolbar:true, data:result.data.spcxb,
+                    page:{
+                        layout: ['count', 'prev', 'page', 'next'],
+                        limit: 10
+                    },
+                    cols: [[
+                        {title:'销沉比率', templet:function(d){
+                            return parseFloat(d.cxb).toFixed(2);
+                        }},
+                        {field:'name', title:'商品名称'},
+                        {field:'price', title:'商品价格'}
+                    ]]
+                });
+                // 销售排行统计
+                layui.table.render({
+                    elem:'#xstj', toolbar:true, data:result.data.xstj,
+                    page:{
+                        layout: ['count', 'prev', 'page', 'next'],
+                        limit: 10
+                    },
+                    cols: [[
+                        {field:'goods_total_money', title:'销售金额'},
+                        {field:'area_parents_name', title:'分区'},
+                        {field:'boxs_name', title:'盒子名称'},
+                        {field:'agent_name', title:'代理人'},
+                        {field:'phone', title:'电话'}
+                    ]]
+                });
+            });
+        }
+        
+        // 版本信息
+        var obj_server_software = document.getElementsByClassName('server_software')[0],
+            obj_php_version = document.getElementsByClassName('php_version')[0];
+        obj_server_software.innerHTML = sessionStorage.getItem('SERVER_SOFTWARE');
+        obj_php_version.innerHTML = sessionStorage.getItem('PHP_VERSION');
+        
+        // 登录日志
+        layui.table.render({
+            elem: '#sign-log',
+            toolbar: '#toolbar',
+            height: '250',
+            url: 'admin.php/main/signLog',
+            page: {
+                layout: ['count', 'prev', 'page', 'next'],
+                limit: 10
+            },
+            cols: [[
+                {field:'sign_datetime', title:'登录时间'},
+                {field:'sign_ip', title:'登录ip'},
+                {field:'status', title:'状态', width:65, templet:'#status-html'},
+            ]]
+        });
+        // 清除前100条
+        layui.table.on('toolbar(sign-log)', function(obj){
+            app.lay._confirm('确认清除前100条数据么？', function(){
+                app.basic._ajax('admin.php/main/signLogDel', '', function(){
+                    app.lay._tableReload('操作成功', 'sign-log');
+                });
+            });
+        });
+    });
+</script>

@@ -1,0 +1,29 @@
+<div style="padding: 15px;">
+    <div class="layui-hide" id="settlelog"></div>
+</div>
+<script>
+    layui.config({
+        base: '/'
+    }).use(['app','table'], function(){
+        var app = layui.app, agent = app.basic._toolCheckData('agent');
+        // 列表
+        layui.table.render({
+            elem: '#settlelog',
+            toolbar: true,
+            url: 'admin.php/Agent/settleLog?agent_id='+agent.id,
+            page: {layout: ['count', 'prev', 'page', 'next'],limit: 10},
+            cols: [[
+                {title:'时间段', width:314, templet:function(d){
+                    return d.start_time+' 至 '+d.end_time;
+                }},
+                {title:'代理商', templet:function(){
+                    return '姓名：'+agent.name+'<br/>账号：'+agent.account;
+                }},
+                {field:'sell_money', title:'销售金额（元）'},
+                {field:'loss_money', title:'耗损金额（元）'},
+                {field:'pay_money', title:'应结金额（元）'},
+                {field:'time', title: '结账时间'}
+            ]]
+        });
+    });
+</script>

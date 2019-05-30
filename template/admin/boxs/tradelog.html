@@ -1,0 +1,38 @@
+<div style="padding: 15px;">
+    <div class="layui-hide" id="tradelog"></div>
+</div>
+<script>
+    layui.config({
+        base: '/'
+    }).use(['app','table'], function(){
+        var app = layui.app,
+            boxsData = layui.table.checkStatus('boxs').data,
+            ids = boxsData.map(function(el){return +el.id;});
+
+        // 列表
+        layui.table.render({
+            elem: '#tradelog',
+            toolbar: true,
+            url: 'admin.php/Boxs/tradelog?ids='+ids.join('|'),
+            page: {layout: ['count', 'prev', 'page', 'next'],limit: 10},
+            cols: [[
+                {title:'盒子名称', templet:function(e){
+                    console.log(e);
+                    var boxs_name = '';
+                    boxsData.forEach(function(item){
+                        if(e.boxs_id == item.id){
+                            boxs_name = item.name;
+                        }
+                    });
+                    return boxs_name;
+                }},
+                {field:'order_number', title:'订单号'},
+                {field:'goods_name', title:'商品名称'},
+                {field:'goods_total_money', title:'商品个数'},
+                {field:'goods_total_number', title:'商品金额'},
+                {field:'nickname', title:'购买用户'},
+                {field:'time', title:'下单时间'}
+            ]]
+        });
+    });
+</script>

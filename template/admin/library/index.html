@@ -1,0 +1,353 @@
+<div class="layui-card">
+    <div class="layui-tab layui-tab-brief">
+        <ul class="layui-tab-title">
+            <li class="layui-this">仓库管理</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <form class="layui-form table-search-box">
+                    <div class="layui-inline">
+                        <input type="text" name="keyword" class="layui-input" placeholder="请输入仓库名称">
+                    </div>
+                    <button type="button" lay-filter="search" lay-submit="" class="layui-btn layui-btn-sm layui-btn-normal">
+                        <i class="layui-icon layui-icon-search"></i> 搜索
+                    </button>
+                </form>
+                <div class="layui-hide" id="library" lay-filter="library"></div>
+                <script type="text/html" id="tool">
+                    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">仓库详情</a>
+                    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="give">配送记录</a>
+                    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="back">退货记录</a>
+                </script>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.config({
+        base: '/'
+    }).use(['app','table'], function(){
+        var app = layui.app;
+
+        // 列表
+        layui.table.render({
+            elem: '#library',
+            toolbar: true,
+            url: 'admin.php/Library/library?route='+location.hash.substring(1),
+            page: {layout: ['count', 'prev', 'page', 'next'],limit: 10},
+            done: function(res){app.basic._nodes(res.other,'library');},
+            cols: [[
+                {type:"checkbox"},
+                {field:'name', title:'仓库名称'},
+                {field:'goods_count', title:'商品数量（件/个）'},
+                {field:'goods_count_price', title:'商品总金额（元）'},
+                {title:'管理员', templet:function(d){
+                    var admin_name = [];
+                    d.admin.forEach(function(admin){
+                        var warehouse_ids = admin.warehouse_ids.split(',');
+                        if(warehouse_ids.indexOf(""+d.id+"") > -1){
+                            admin_name.push(admin.account);
+                        }
+                    });
+                    return admin_name.join('；');
+                }},
+                {field:'id', title: 'id'},
+                {title:'操作', toolbar:'#tool'}
+            ]],
+        });
+        layui.table.on('toolbar(library)', function(obj){
+            app.basic._isNode(this.getAttribute('access-id'), function(){
+                // 添加
+                if(obj.event == 'add'){
+                    modal({
+                        "title":"添加",
+                        "filter":"add",
+                        "file":"library/library-modal",
+                        "width":"50%",
+                        "height":"574px",
+                        "data":""
+                    });
+                    layui.form.on('submit(add)', function(data){
+                        var goods = [];
+                        app.o('div[lay-id="goods"] .layui-table-body tbody input[name="goods"]').each(function() {
+                            if(app.o(this).val()){
+                                goods.push({'goods_id':app.o(this).attr('goods_id'),'goods_stock':app.o(this).val()});
+                            }
+                        });
+                        if(goods.length > 0){
+                            data.field['goods'] = goods;
+                            app.basic._ajax('admin.php/Library/libraryAdd',data.field,function(){
+                                app.lay._tableReload('添加成功','library');
+                            });
+                        }else{
+                            layui.layer.msg('请分配商品库存', {icon:5});
+                        }
+                    });
+                }
+                // 编辑
+                if(obj.event == 'edit'){
+                    var data = layui.table.checkStatus('library').data;
+                    if(data.length != 1){
+                        layui.layer.msg('请确认操作对象', {icon: 5});
+                    }else{
+                        modal({
+                            "title":"编辑",
+                            "filter":"edit",
+                            "file":"library/library-modal",
+                            "width":"50%",
+                            "height":"574px",
+                            "data":data[0]
+                        });
+                        layui.form.on('submit(edit)', function(data){
+                            var goods = [];
+                            app.o('div[lay-id="goods"] .layui-table-body tbody input[name="goods"]').each(function() {
+                                if(app.o(this).val()){
+                                    goods.push({'goods_id':app.o(this).attr('goods_id'),'goods_stock':app.o(this).val()});
+                                }
+                            });
+                            if(goods.length > 0){
+                                data.field['goods'] = goods;
+                                app.basic._ajax('admin.php/Library/libraryEdit',data.field,function(){
+                                    app.lay._tableReload('更新成功','library');
+                                });
+                            }else{
+                                layui.layer.msg('请分配商品库存', {icon:5});
+                            }
+                        });
+                    }
+                }
+                // 删除
+                if(obj.event == 'del'){
+                    var data = layui.table.checkStatus('library').data;
+                    if(data.length < 1){
+                        layui.layer.msg('请确认操作对象', {icon: 5});
+                    }else{
+                        var ids = data.map(function(el){
+                            return +el.id;
+                        });
+                        app.lay._confirm('确认删除么？', function(){
+                            app.basic._ajax('admin.php/Library/libraryDel', {'ids':ids}, function(){
+                                app.lay._tableReload('删除成功','library');
+                            });
+                        });
+                    }
+                }
+            });
+        });
+        layui.table.on('tool(library)', function(obj){
+            app.basic._isNode(this.getAttribute('access-id'), function(){
+                // 仓库详情
+                if(obj.event == 'detail'){
+                    modal({
+                        "title":"仓库详情",
+                        "filter":"detail",
+                        "file":"library/detail",
+                        "width":"50%",
+                        "height":"520px",
+                        "data":obj.data
+                    });
+                }
+                // 配送记录
+                if(obj.event == 'give'){
+                    modal({
+                        "title":"配送记录",
+                        "filter":"give",
+                        "file":"library/give",
+                        "width":"50%",
+                        "height":"520px",
+                        "data":obj.data
+                    });
+                }
+                // 退货记录
+                if(obj.event == 'back'){
+                    modal({
+                        "title":"退货记录",
+                        "filter":"back",
+                        "file":"library/back",
+                        "width":"70%",
+                        "height":"520px",
+                        "data":obj.data
+                    });
+                }
+            });
+        });
+        // 搜索
+        layui.form.on('submit(search)', function(data){
+            layui.table.reload('library', {
+                page: {curr: 1},
+                where: {keyword: data.field.keyword}
+            });
+        });
+        // 打开窗口
+        function modal(param){
+            app.lay._layer(param.title, param.filter, param.file, function(){
+                if(param.filter == 'add' || param.filter == 'edit'){
+                    // 商品列表
+                    layui.table.render({
+                        elem: '#goods',
+                        url: 'admin.php/Goods/goods',
+                        page: {layout: ['count', 'prev', 'page', 'next'],limit: 5},
+                        cols: [[
+                            {field:'type_name',title:'商品分类'},
+                            {field:'name', title:'商品名称'},
+                            {field:'price', title:'商品价格（元）'},
+                            {field:'stock', title:'库存（件/个）'},
+                            {title:'分配库存', templet:function(e){
+                                return '<input type="number" name="goods" goods_id="'+e.id+'" class="layui-input" onkeyup="if(this.value>'+e.stock+'){this.value='+e.stock+';}if(this.value<1){this.value=null;}" />';
+                            }}
+                        ]],
+                        done: function(){
+                            // 赋值
+                            if(param.filter == 'edit'){
+                                layui.form.val('form',{"id":param.data.id,"name":param.data.name});
+                                // 该仓库商品分配值
+                                app.basic._ajax('admin.php/Library/warehouseList',{"warehouse_id":param.data.id},function(result){
+                                    result.data.forEach(function(e){
+                                        app.o('div[lay-id="goods"] .layui-table-body tbody input[name="goods"]').each(function() {
+                                            if(e.goods_id == app.o(this).attr('goods_id')){
+                                                app.o(this).val(e.goods_stock);
+                                            }
+                                        });
+                                    });
+                                })
+                            }
+                        }
+                    });
+                }
+                if(param.filter == 'detail'){
+                    layui.table.render({
+                        elem: '#detail',
+                        url: 'admin.php/Library/libraryDetail?id='+param.data.id,
+                        page: {layout: ['count', 'prev', 'page', 'next'],limit: 10},
+                        cols: [[
+                            {title:'仓库名称',templet:function(){return param.data.name}},
+                            {title:'商品名称',templet:function(e){return e.goods.name}},
+                            {title:'商品单价（元）',templet:function(e){return e.goods.price}},
+                            {field:'goods_stock',title:'商品个数（件/个）'}
+                        ]]
+                    });
+                }
+                if(param.filter == 'give'){
+                    layui.table.render({
+                        elem: '#give',
+                        url: 'admin.php/Library/give?id='+param.data.id,
+                        page: {layout: ['count', 'prev', 'page', 'next'],limit: 10},
+                        cols: [[
+                            {field:'boxs', title:'盒子名称'},
+                            {field:'sqr_info', title:'申请人:电话'},
+                            {field:'goods_total_number', title:'商品数量'},
+                            {field:'goods_total_money', title:'商品金额'},
+                            {field:'time', title:'申请时间'},
+                            {field:'status_str', title:'状态'},
+                            {title:'操作',width:90,templet:function(e){
+                                var a = '';
+                                if(e.status == 5) a = '<a class="layui-btn layui-btn-primary layui-btn-xs" id="'+e.id+'" status="6">确认配送</a>';
+                                if(e.status == 6) a = '<a class="layui-btn layui-btn-primary layui-btn-xs" id="'+e.id+'" status="8">取消配送</a>';
+                                return a;
+                            }}
+                        ]]
+                    });
+                }
+                if(param.filter == 'back'){
+                    layui.table.render({
+                        elem: '#back',
+                        url: 'admin.php/Library/back?id='+param.data.id,
+                        page: {layout: ['count', 'prev', 'page', 'next'],limit: 10},
+                        cols: [[
+                            {field:'id', title:'订单ID'},
+                            {field:'sqr_info', title:'申请人:电话'},
+                            {field:'jhr_info', title:'接货人:电话'},
+                            {field:'goods_total_number', title:'商品总数'},
+                            {field:'goods_total_money', title:'商品总价'},
+                            {field:'status_str', title:'状态'},
+                            {title:'操作', width:180, templet:function(e){
+                                var a = '<a class="layui-btn layui-btn-primary layui-btn-xs dyxp-btn" id="'+e.id+'" sqr_info="'+e.sqr_info+'" jhr_info="'+e.jhr_info+'" time="'+e.time+'" status_str="'+e.status_str+'">打印小票</a>';
+                                if(e.status == 10) a += '<a class="layui-btn layui-btn-primary layui-btn-xs qrrk-btn" id="'+e.id+'">确认入库</a>';
+                                return a;
+                            }}
+                        ]]
+                    });
+                }
+            }, param.width, param.height);
+        }
+        // 配送操作 确认/取消
+        app.o('body').on('click','div[lay-id="give"] a',function(){
+            var data = {"id":app.o(this).prop('id'),"status":app.o(this).attr('status')};
+            app.basic._ajax('admin.php/Library/giveOper', data, function(){
+                app.lay._tableReload('操作成功','give');
+            });
+        });
+        // 打印小票
+        app.o('body').on('click','div[lay-id="back"] .dyxp-btn', function(){
+            var _that = app.o(this);
+            var data = {
+                "id":_that.prop('id'),
+                "sqr_info":_that.attr('sqr_info'),
+                "jhr_info":_that.attr('jhr_info'),
+                "time":_that.attr('time'),
+                "status_str":_that.attr('status_str')
+            };
+            app.basic._ajax('admin.php/Library/printing', data, function(){
+                layui.layer.msg('打印成功');
+            });
+        });
+        // 退货记录操作
+        app.o('body').on('click','div[lay-id="back"] .qrrk-btn',function(){
+            var _that = app.o(this);
+            // 详情
+            app.o.get(app.conf._templatePath()+'library/back-detail.html', function(html){
+                layui.layer.open({
+                    title:'入库商品详情', area:['40%','520px'], type:1, maxmin:true,
+                    content:html, 
+                    success: function(layero, index){
+                        layui.form.val('form',{"agent_goods_return_id":_that.prop('id')});
+                        layui.table.render({
+                            elem: '#back-detail',
+                            url: 'admin.php/Library/backDetail?id='+_that.prop('id'),
+                            page: {layout: ['count', 'prev', 'page', 'next'],limit: 10},
+                            cols: [[
+                                {field:'goods_name', title:'商品名称'},
+                                {field:'goods_price', title:'商品单价（元）'},
+                                {field:'goods_number', title:'商品个数'},
+                                {title:'入库个数',templet:function(e){
+                                    return '<input type="number" name="goods_number" id="'+e.id+'" goods_number="'+e.goods_number+'" goods_price="'+e.goods_price+'" value="'+e.goods_number+'" class="layui-input" onkeyup="if(this.value>'+e.goods_number+'){this.value='+e.goods_number+';}if(this.value<1){this.value=null;}" />';
+                                }},
+                                {title:'入库金额（元）',templet:function(e){
+                                    return '<input type="text" name="money" value="'+e.goods_price*e.goods_number+'" disabled="disabled" class="layui-input" />';
+                                }}
+                            ]]
+                       }); 
+                    }
+                });
+            });
+        });
+        // 入库个数
+        app.o('body').on('input propertychange','div[lay-id="back-detail"] input[name="goods_number"]',function(){
+            var _that = app.o(this);
+            if(_that.val()<_that.attr('goods_number')){
+                _that.parents('td').next('td').find('input[name="money"]').val(_that.val()*_that.attr('goods_price'));
+            }
+            _that.mouseout(function(){
+                _that.parents('td').next('td').find('input[name="money"]').val(_that.val()*_that.attr('goods_price'));
+            });
+        });
+        // 提交入库信息
+        layui.form.on('submit(back-enter)', function(data){
+            var lines = [], goods_total_money = 0;
+            app.o('div[lay-id="back-detail"] input[name="goods_number"]').each(function() {
+                lines.push({'id':app.o(this).prop('id'),'goods_number':app.o(this).val()});
+            });
+            app.o('div[lay-id="back-detail"] input[name="money"]').each(function() {
+                goods_total_money += parseFloat(app.o(this).val());
+            });
+            var param = {
+                "agent_goods_return_id":data.field.agent_goods_return_id,
+                "goods_total_money":goods_total_money,
+                "lines":lines
+            }
+            app.basic._ajax('admin.php/Library/backEnter', param, function(){
+                app.lay._tableReload('操作成功', 'back-detail');
+            });
+        });
+    });
+</script>

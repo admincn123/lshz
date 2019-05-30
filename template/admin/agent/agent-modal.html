@@ -1,0 +1,105 @@
+<form class="layui-form layui-form-pane" lay-filter="agent-modal">
+    <input type="hidden" name="id">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">选择仓库</label>
+                    <div class="layui-input-block">
+                        <select name="warehouse_id" lay-verify="notempty" lay-verType="tips" placeholder="请选择仓库"></select>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-form-item layui-form-text">
+                    <label class="layui-form-label">分配盒子</label>
+                    <div class="layui-input-block" style="min-height: auto;">
+                        <div class="layui-textarea boxs" lay-verify="checkbox" lay-verType="tips" placeholder="请选择盒子" style="min-height: auto;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">姓名</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="name" lay-verify="name" lay-verType="tips" placeholder="请输入用户账号" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">手机</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="phone" lay-verify="phone" lay-verType="tips" placeholder="请输入用户账号" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">登录密码</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="password" lay-verify="password" lay-verType="tips" placeholder="请输入账号密码" autocomplete="off" class="layui-input" value="123456">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="layui-col-md12 layer-btn-box">
+                <div class="layui-form-item">
+                    <slot></slot>
+                    <button type="reset" class="layui-btn layui-btn-sm layui-btn-primary layui-layer-close">取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script>
+    layui.config({
+        base: '/'
+    }).use(['app'], function(){
+        var app = layui.app,
+            agent = layui.table.checkStatus('agent').data[0];
+
+        layui.form.render('select');
+        // 添加
+        layui.form.on('submit(add)', function(data){
+            data.field['account'] = data.field.phone;
+            data.field['password'] = app.handle._md5(data.field['password']);
+            app.basic._ajax('admin.php/Agent/agentAdd', data.field, function(){
+                app.lay._tableReload('添加成功', 'agent');
+            });
+        });
+        // 编辑
+        layui.form.on('submit(edit)', function(data){
+            data.field['account'] = data.field.phone;
+            app.basic._ajax('admin.php/Agent/agentEdit', data.field, function(){
+                app.lay._tableReload('更新成功', 'agent');
+            });
+        });
+        // 仓库select
+        app.basic._ajax('admin.php/Library/library', false, function(result){
+            var option = '<option value="">请选择仓库</option>';
+            result.data.forEach(function(item){
+                option += '<option value="'+item.id+'">'+item.name+'</option>';
+            });
+            document.querySelector('select[name="warehouse_id"]').innerHTML = option;
+            // 赋值
+            if(agent) layui.form.val('agent-modal',agent);
+            layui.form.render('select');
+        });
+        // 盒子选择
+        app.basic._ajax('admin.php/Boxs/boxs', false, function(result){
+            var input = '';
+            // 赋值盒子
+            if(agent && agent.boxs){
+                agent.boxs.forEach(function(item){
+                    input += '<input type="checkbox" name="boxs_id['+item.id+']" title="'+item.name+'" lay-skin="primary" checked>';
+                });
+            }
+            result.data.forEach(function(item){
+                input += '<input type="checkbox" name="boxs_id['+item.id+']" title="'+item.name+'" lay-skin="primary">';
+            });
+            document.querySelector('.boxs').innerHTML = input;
+            layui.form.render('checkbox');
+        });
+    });
+</script>

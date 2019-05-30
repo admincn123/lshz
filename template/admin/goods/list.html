@@ -1,0 +1,123 @@
+<div class="layui-card">
+    <div class="layui-tab layui-tab-brief">
+        <ul class="layui-tab-title">
+            <li class="layui-this">商品列表</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <div class="layui-hide" id="goods" lay-filter="goods"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.config({
+        base: '/'
+    }).use(['app','table'], function(){
+        var app = layui.app;
+
+        // 列表
+        layui.table.render({
+            elem: '#goods',
+            toolbar: true,
+            url: 'admin.php/Goods/goods?route='+location.hash.substring(1),
+            page: {layout: ['count', 'prev', 'page', 'next'],limit: 10},
+            done: function(res){app.basic._nodes(res.other);},
+            cols: [[
+                {type:'checkbox'},
+                {field:'photo', title:'商品图片', align:'center', templet:function(e){
+                    (!e.photo)? photo = '<i class="layui-icon layui-icon-picture"></i>' : photo = '<img src="'+e.photo+'" />';
+                    return photo;
+                }},
+                {field:'name', title:'商品名称'},
+                {field:'type_name', title:'商品分类'},
+                {field:'original_price', title: '进货价（元）'},
+                {field:'price', title:'零售价（元）'},
+                {field:'stock', title:'库存'},
+                {field:'time', title:'添加时间'},
+                {field:'id', title: 'id'}
+            ]],
+        });
+        layui.table.on('toolbar(goods)', function(obj){
+            app.basic._isNode(this.getAttribute('access-id'), function(){
+                // 添加
+                if(obj.event == 'add'){
+                    modal({
+                        "title":"添加",
+                        "filter":"add",
+                        "file":"goods/goods-modal",
+                        "width":"30%",
+                        "height":"490px",
+                        "data":""
+                    });
+                    layui.form.on('submit(add)', function(data){
+                        app.basic._ajax('admin.php/Goods/goodsAdd', data.field,function(){
+                            app.lay._tableReload('添加成功','goods');
+                        });
+                    });
+                }
+                // 编辑
+                if(obj.event == 'edit'){
+                    var data = layui.table.checkStatus('goods').data;
+                    if(data.length != 1){
+                        layui.layer.msg('请确认操作对象', {icon: 5});
+                    }else{
+                        modal({
+                            "title":"编辑",
+                            "filter":"edit",
+                            "file":"goods/goods-modal",
+                            "width":"30%",
+                            "height":"490px",
+                            "data":data[0]
+                        });
+                        layui.form.on('submit(edit)', function(data){
+                            app.handle._jsonFieldDel(data.field,['file']);
+                            app.basic._ajax('admin.php/Goods/goodsEdit', data.field,function(){
+                                app.lay._tableReload('更新成功','goods');
+                            });
+                        });
+                    }
+                }
+                // 删除
+                if(obj.event == 'del'){
+                    var data = layui.table.checkStatus('goods').data;
+                    if(data.length < 1){
+                        layui.layer.msg('请确认操作对象', {icon: 5});
+                    }else{
+                        var ids = data.map(function(el){
+                            return +el.id;
+                        });
+                        app.lay._confirm('确认删除么？', function(){
+                            app.basic._ajax('admin.php/Goods/goodsDel', {'ids':ids}, function(){
+                                app.lay._tableReload('删除成功','goods');
+                            });
+                        });
+                    }
+                }
+            });
+        });
+
+        // 打开窗口
+        function modal(param){
+            app.lay._layer(param.title, param.filter, param.file, function(){
+                var data = param.data;
+                // 上传图片
+                app.lay._uploads('photo','admin.php/Common/uploads',data.photo);
+                // 获取商品分类
+                app.basic._ajax('admin.php/Goods/typeGet','',function(result){
+                    var option = '', obj = document.querySelector('select[name="classify_id"]');
+                    result.data.forEach(function(e){
+                        option += '<option value="'+e.id+'">'+e.name+'</option>';
+                    });
+                    obj.innerHTML = '<option value="">请选择商品分类</option>'+option;
+                    // 赋值
+                    layui.form.val('form',{
+                        "id":data.id, "name":data.name, "classify_id":data.classify_id, "photo":data.photo,
+                        "original_price":data.original_price, "price":data.price, "stock":data.stock
+                    });
+                    layui.form.render('select');
+                });
+            }, param.width, param.height);
+        }
+    });
+</script>

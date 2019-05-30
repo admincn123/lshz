@@ -1,0 +1,80 @@
+<form class="layui-form layui-form-pane" lay-filter="form">
+    <input type="hidden" name="id">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">商品名称</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="name" lay-verify="notempty" lay-verType="tips" placeholder="请输入商品名称" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">商品分类</label>
+                    <div class="layui-input-block">
+                        <select name="classify_id" lay-verify="notempty" lay-verType="tips"></select>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-form-item-box" id="photo">
+                    <div class="header">
+                        <button type="button" class="layui-btn layui-btn-sm layui-btn-normal">商品图片</button>
+                        <input type="hidden" name="photo" lay-verify="notempty" placeholder="请上传商品图片">
+                    </div>
+                    <div class="body">
+                        <div class="tips">最佳图片尺寸：400*400</div>
+                        <div class="body-view"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">进货价</label>
+                    <div class="layui-input-block">
+                        <div class="layui-col-md8 layui-col-xs8">
+                            <input type="number" name="original_price" lay-verify="notempty" lay-verType="tips" placeholder="请输入进货价" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-col-md4 layui-col-xs4">
+                            <label class="layui-form-label layui-form-company">元</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">零售价</label>
+                    <div class="layui-input-block">
+                        <div class="layui-col-md8 layui-col-xs8">
+                            <input type="number" name="price" lay-verify="notempty" lay-verType="tips" placeholder="请输入零售价" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-col-md4 layui-col-xs4">
+                            <label class="layui-form-label layui-form-company">元</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">库存</label>
+                    <div class="layui-input-block">
+                        <div class="layui-col-md8 layui-col-xs8">
+                            <input type="number" name="stock" lay-verify="notempty" lay-verType="tips" placeholder="请输入库存量" autocomplete="off" class="layui-input">
+                        </div>
+                        <div class="layui-col-md4 layui-col-xs4">
+                            <label class="layui-form-label layui-form-company">件/个</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="layui-col-md12 layer-btn-box">
+                <div class="layui-form-item">
+                    <button type="reset" class="layui-btn layui-btn-sm layui-btn-primary layui-layer-close" >取消</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

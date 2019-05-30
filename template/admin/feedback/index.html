@@ -1,0 +1,35 @@
+<div class="layui-card">
+    <div class="layui-tab layui-tab-brief">
+        <ul class="layui-tab-title">
+            <li class="layui-this">论坛管理</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <div class="layui-hide" id="admin" lay-filter="admin"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.config({
+        base: '/'
+    }).use(['app','table'], function(){
+        var app = layui.app;
+
+        // 列表
+        layui.table.render({
+            elem: '#admin',
+            toolbar: true,
+            url: 'admin.php/Feedback/feedbacks?route='+location.hash.substring(1),
+            page: {layout: ['count', 'prev', 'page', 'next'],limit: 10},
+            done: function(res){app.basic._nodes(res.other);},
+            cols: [[
+                {field:'name', title:'姓名'},
+                {field:'phone', title:'电话'},
+                {field:'content', title:'反馈内容'},
+                {field:'time', title:'反馈时间'},
+                {field:'id', title: 'id'}
+            ]],
+        });
+    });
+</script>

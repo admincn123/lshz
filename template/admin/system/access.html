@@ -1,0 +1,243 @@
+<div class="layui-card">
+    <div class="layui-tab layui-tab-brief">
+        <ul class="layui-tab-title">
+            <li class="layui-this">权限菜单</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show tree" lay-id="access">
+                <div class="layui-form layui-border-box layui-table-view">
+                    <div class="layui-table-tool">
+                        <div class="layui-table-tool-temp" id="toolbar"></div>
+                    </div>
+                </div>
+                <div class="layui-table-body">
+                    <table class="layui-table layui-form" id="access"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.config({
+        base: '/'
+    }).use(['app','colorpicker'], function(){
+        var app = layui.app,
+            RE = '';
+
+        // 列表
+        app.basic._ajax('admin.php/System/access', {"route":location.hash.substring(1)}, function(result){
+            RE = app.Tree.render({
+                elem:'#access',icon_key:'title',is_check_auto:false,data:result.data,
+                end: function(e){app.basic._nodes(result.other);},
+                cols: [
+                    {key:'icon',title:'图标',width:'30px',align:'center',template:function(e){
+                        if(!e.icon){return '--';}else{return '<i class="layui-icon '+e.icon+'"></i>';}
+                    }},
+                    {key:'title', title:'权限菜单',width:'120px',template:function(e){
+                        return '<span style="color: '+e.node_color+'">'+e.name+'</span>';
+                    }},
+                    {key:'sort',title:'排序',width:'100px',template:function(e){
+                        return '<input type="number" name="sort" value="'+e.sort+'" id="'+e.id+'" class="layui-input">';
+                    }},
+                    {key:'route', title:'路由地址',template:function(e){
+                        if(!e.route){return '--';}else{return e.route;}
+                    }},
+                    {key:'open_mode', title:'属性',align:'center',template:function(e){
+                        if(!e.node){return '菜单';}else{return '按钮';}
+                    }},
+                    {key:'open_mode', title:'打开方式',align:'center',template:function(e){
+                        if(e.open_mode != 'page'){return '窗口';}else{return '页面';}
+                    }},
+                    {key:'node', title:'节点ID名',align:'center',template:function(e){
+                        if(!e.node){return '--';}else{return e.node;}
+                    }},
+                    {key:'date', title:'创建时间'},
+                    {key:'status', title:'状态',width:'64px',align:'center',template:function(e){
+                        (!e.status)? checked='checked' : checked='';
+                        return '<input type="checkbox" name="status" value="'+e.status+'" id="'+e.id+'" lay-skin="switch" lay-text="开启|关闭" lay-filter="status" '+checked+'>';
+                    }}
+                ]
+            });
+        });
+        app.o('#toolbar').on('click','button', function(e){
+            var _that = app.o(this);
+            app.basic._isNode(_that.attr('access-id'), function(){
+                // 添加
+                if(_that.attr('lay-event') == 'add'){
+                    var data = app.Tree.checked(RE);
+                    if(data.length > 1){
+                       layui.layer.msg('只能选择一个父级，不选择为顶级',{icon: 5}); 
+                    }else if(data[0] && data[0].node){
+                        layui.layer.msg('按钮不能添加子级',{icon: 5});
+                    }else{
+                        modal({
+                            "title":"添加",
+                            "filter":"add",
+                            "file":"system/access-modal",
+                            "width":"42%",
+                            "height":"424px",
+                            "data":data[0],
+                        });
+                        layui.form.on('submit(add)', function(data){
+                            // 菜单、节点处理
+                            var data = menu_nodes(data); // 数据处理
+                            app.basic._ajax('admin.php/System/accessAdd', data.field, function(){
+                                app.route._reload('添加成功', 1000);
+                            });
+                        });
+                    }
+                }
+                // 编辑
+                if(_that.attr('lay-event') == 'edit'){
+                    var data = app.Tree.checked(RE);
+                    if(data.length != 1){
+                        layui.layer.msg('请确认操作对象', {icon:5});
+                    }else{
+                        modal({
+                            "title":"编辑",
+                            "filter":"edit",
+                            "file":"system/access-modal",
+                            "width":"42%",
+                            "height":"432px",
+                            "data":data[0]
+                        });
+                        layui.form.on('submit(edit)', function(data){
+                            app.basic._ajax('admin.php/System/accessEdit',data.field, function(){
+                                app.route._reload('更新成功', 1000);
+                            });
+                        });
+                    } 
+                }
+                // 删除
+                if(_that.attr('lay-event') == 'del'){
+                    var ids = app.Tree.checkedId(RE), state = '';
+                    if(ids.length < 1) state = '请确认操作对象';
+                    ids.forEach(function(el){if(el <= 3) state = '禁止删除 ID：1-19';});
+                    if(state){
+                       layui.layer.msg(state, {icon: 5});
+                    }else{
+                        app.lay._confirm('其子级将一并删除，确认删除么？', function(){
+                            app.basic._ajax('admin.php/System/accessDel',{'ids':ids}, function(){
+                                app.route._reload('删除成功', 1000);
+                            });
+                        });
+                    }
+                }
+                // 排序
+                if(_that.attr('lay-event') == 'sort'){
+                    var data = [];
+                    app.o('#access tbody input[name="sort"]').each(function() {
+                        data.push({'id':app.o(this).prop('id'),'sort':app.o(this).val()});
+                    });
+                    app.basic._ajax('admin.php/System/accessSort', {"data":data}, function(){
+                        app.route._reload('操作成功', 1000);
+                    });
+                }
+            });
+        });
+        // 状态
+        layui.form.on('switch(status)', function(obj){
+            var _that = this;
+            app.basic._isNode(app.o(this).attr('access-id'), function(){
+                (parseInt(_that.value) == 0)? status = 1 : status = 0;
+                var data = {'id':_that.id, 'status':status};
+                app.basic._ajax('admin.php/System/accessStatus', data, function(){
+                    app.route._reload('操作成功', 1000);
+                });
+            });
+        });
+        // 打开页面
+        function modal(param){
+            app.lay._layer(param.title, param.filter, param.file, function(layero){
+                var data = param.data, icon = '', node_color = '#1e9fff';
+                if(param.filter == 'edit') {
+                    icon = data.icon; node_color = data.node_color;
+                    // 赋值
+                    layui.form.val('form', {
+                        'id':data.id,'pid':data.pid,'name':data.name,'icon':data.icon,'route':data.route,'node':data.node,'node_color':data.node_color,'open_mode':data.open_mode
+                    });
+                }
+                // tab处理
+                tab(param, layero);
+                // 图标
+                iconPic(['menu-icon','node-icon'], icon);
+                // 颜色控件
+                colorPic(node_color);
+                // form渲染
+                layui.form.render();
+            }, param.width, param.height);
+        }
+        // tab处理
+        function tab(param, layero){
+            var data = param.data, tabThis = layero.find('.layui-tab .layui-this');
+            if(param.filter == 'add'){
+                // 添加顶级/添加子级
+                (!data)? tabThis.next('li').hide() :
+                layui.form.val('form',{'pid':data.id,'route':data.route+'/','node_color':'#1e9fff'});
+            }else{
+                if(data.route){     // 菜单
+                    tabThis.next('li').remove();
+                }else{              // 按钮
+                    tabThis.next('li').click(); tabThis.remove();
+                    app.o('.node-item').show(); app.o('.node-time-pre').remove();
+                }
+            }
+        }
+        // 图标控件
+        function iconPic(obj, icon){
+            obj.forEach(function(el){
+                app.iconPicker.render({elem:'#'+el, type:'fontClass', search:true, page:true});
+                // 编辑时选中图标
+                if(icon) app.iconPicker.checkIcon(el,icon);
+            });
+        }
+        // 颜色控件
+        function colorPic(node_color){
+            layui.colorpicker.render({
+                elem:'#colorpicker-box', color:node_color, predefine:true,
+                colors: ['#009688','#FFB800','#FF5722','#1E9FFF','#5FB878','#2F4056'],
+                done: function(color){
+                    document.querySelector('input[name="node_color"]').value = color;
+                }
+            });
+        }
+        // 节点选择-其它操作
+        layui.form.on('checkbox(other)', function(obj){
+            var obj_name = app.o('input[name="name"]'), obj_node = app.o('input[name="node"]');
+            if(document.querySelector('input[lay-filter="other"]').checked){
+                app.o('.node-item').show();
+                // 添加验证
+                obj_name.attr('lay-verify','notempty');obj_node.attr('lay-verify','letter');
+            }else{
+                app.o('.node-item').hide();
+                obj_name.removeAttr('lay-verify');obj_name.val('');
+                obj_node.removeAttr('lay-verify');obj_node.val('');
+            }
+        });
+        // 菜单/节点处理
+        function menu_nodes(data){
+            if(app.o('#layer-modal .layui-this').index() == 0){
+                // 添加菜单时 排序处理
+                var obj_tbody = app.o('#access tbody'),
+                    checked_id = obj_tbody.find('.layui-form-checked').parents('tr').attr('data-id');
+                    sort = obj_tbody.find('tr[data-pid="0"]').length+1;
+                if(checked_id) sort = obj_tbody.find('tr[data-pid="'+checked_id+'"]').length+1;
+                data.field['sort'] = sort;
+            }else{
+                // 添加节点时
+                var node_pre = [];
+                app.o('input[lay-filter="node"]:checked').each(function(i, e){
+                    var _that = app.o(this), str='';
+                    str += _that.attr('title')+'|'+_that.attr('node')+'|'+_that.attr('icon')+'|'+_that.attr('color');
+                    node_pre.push(str);
+                });
+                // 选择其它操作
+                if(data.field.node) node_pre.push(data.field.name+'|'+data.field.node+'|'+data.field.icon+'|'+data.field.node_color);
+                // 数据处理
+                data.field.node = node_pre;
+                app.handle._jsonFieldDel(data.field,['id','icon','name','node_color']);
+            }
+            return data;
+        }
+    });
+</script>

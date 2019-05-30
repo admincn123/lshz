@@ -1,0 +1,78 @@
+<div class="layui-card">
+    <div class="layui-tab layui-tab-brief">
+        <ul class="layui-tab-title">
+            <li class="layui-this">盒子分区</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show tree" lay-id="area">
+                <div class="layui-form layui-border-box layui-table-view">
+                    <div class="layui-table-tool">
+                        <div class="layui-table-tool-temp" id="toolbar"></div>
+                    </div>
+                </div>
+                <div class="layui-table-body">
+                    <table class="layui-table layui-form" id="area"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.config({
+        base: '/'
+    }).use(['app','table'], function(){
+        var app = layui.app,
+            RE = '';
+
+        // 列表
+        app.basic._ajax('admin.php/Boxs/area', {"route":location.hash.substring(1)}, function(result){
+            RE = app.Tree.render({
+                elem:'#area',icon_key:'name',is_check_auto:false,data:result.data,
+                end: function(e){app.basic._nodes(result.other);},
+                cols: [
+                    {key:'name',title:'分区名称'},
+                    {key:'boxs_name',title:'所属盒子',template:function(e){
+                        (e.boxs_name)? boxs_name = e.boxs_name : boxs_name = '--';
+                        return boxs_name;
+                    }},
+                    {key:'goods_total_number',title:'商品个数',template:function(e){
+                        (e.goods_total_number)? total = e.goods_total_number : total = '--';
+                        return total;
+                    }}
+                ]
+            });
+        });
+        app.o('#toolbar').on('click','button', function(e){
+            var _that = app.o(this);
+            app.basic._isNode(_that.attr('access-id'), function(){
+                // 添加
+                if(_that.attr('lay-event') == 'add'){
+                    app.lay._layer('添加','add','boxs/type-modal',false,'20%','224px');
+                }
+                // 编辑
+                if(_that.attr('lay-event') == 'edit'){
+                    var data = app.Tree.checked(RE);
+                    if(data.length != 1){
+                        layui.layer.msg('请确认操作对象', {icon:5});
+                    }else{
+                        sessionStorage.setItem('checked',data[0].pid);
+                        app.lay._layer('编辑','edit','boxs/type-modal',data[0],'20%','224px');
+                    }
+                }
+                // 删除
+                if(_that.attr('lay-event') == 'del'){
+                    var ids = app.Tree.checkedId(RE), state = '';
+                    if(ids.length < 1){
+                        layui.layer.msg('请确认操作对象', {icon: 5});
+                    }else{
+                        app.lay._confirm('其子级将一并删除，确认删除么？', function(){
+                            app.basic._ajax('admin.php/Boxs/areaDel',{'ids':ids}, function(){
+                                app.route._reload('删除成功', 1000);
+                            });
+                        });
+                    }
+                }
+            });
+        });
+    });
+</script>

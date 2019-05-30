@@ -1,0 +1,40 @@
+<div class="layui-card">
+    <div class="layui-tab layui-tab-brief">
+        <ul class="layui-tab-title">
+            <li class="layui-this">用户管理</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <div class="layui-hide" id="admin" lay-filter="admin"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.config({
+        base: '/'
+    }).use(['app','table'], function(){
+        var app = layui.app;
+
+        // 列表
+        layui.table.render({
+            elem: '#admin',
+            toolbar: true,
+            url: 'admin.php/User/users?route='+location.hash.substring(1),
+            page: {layout: ['count', 'prev', 'page', 'next'],limit: 10},
+            cols: [[
+                {
+                    field: 'face_path', title: '头像', align: 'center', templet: function (e) {
+                        (!e.face_path) ? face_path = '<i class="layui-icon layui-icon-picture"></i>' : face_path = '<img src="' + e.face_path + '" />';
+                        return face_path;
+                    }
+                },
+                {field: 'nickname', title: '昵称'},
+                {field: 'phone', title: '手机号'},
+                {field: 'time', title: '注册时间'},
+                {field: 'total_money', title: '消费金额'},
+                {field: 'id', title: 'id'}
+            ]]
+        });
+    });
+</script>

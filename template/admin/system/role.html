@@ -1,0 +1,129 @@
+<div class="layui-card">
+    <div class="layui-tab layui-tab-brief">
+        <ul class="layui-tab-title">
+            <li class="layui-this">角色管理</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item layui-show">
+                <div class="layui-hide" id="role" lay-filter="role"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.config({
+        base: '/'
+    }).use(['app','table'], function(){
+        var app = layui.app,
+            RE = '';
+
+        // 列表
+        layui.table.render({
+            elem: '#role',
+            toolbar: true,
+            url: 'admin.php/System/role?route='+location.hash.substring(1),
+            page: {layout: ['count', 'prev', 'page', 'next'],limit: 10},
+            done: function(res){app.basic._nodes(res.other);},
+            cols: [[
+                {type: 'checkbox'},
+                {field: 'name', title: '角色名称'},
+                {field: 'detail', title: '角色描述'},
+                {field: 'date', title: '创建时间', align: 'center'},
+                {field: 'id', title: 'id', align: 'center'}
+            ]],
+        });
+        layui.table.on('toolbar(role)', function(obj){
+            app.basic._isNode(this.getAttribute('access-id'), function(){
+                // 添加
+                if(obj.event == 'add'){
+                    modal({
+                        "title":"添加",
+                        "filter":"add",
+                        "file":"system/role-modal",
+                        "width":"30%",
+                        "height":"412px"
+                    });
+                    layui.form.on('submit(add)', function(data){
+                        data.field['access_ids'] = app.Tree.checkedId(RE).join('|');
+                        app.basic._ajax('admin.php/System/roleAdd', data.field, function(){
+                            app.lay._tableReload('添加成功','role');
+                        });
+                    });
+                }
+                // 编辑
+                if(obj.event == 'edit'){
+                    var data = layui.table.checkStatus('role').data;
+                    if(data.length != 1){
+                        layui.layer.msg('请确认操作对象', {icon: 5});
+                    }else if(data[0].id == 1){
+                        layui.layer.msg('禁止编辑超级管理员', {icon: 5});
+                    }else{
+                        modal({
+                            "title":"编辑",
+                            "filter":"edit",
+                            "file":"system/role-modal",
+                            "width":"30%",
+                            "height":"412px",
+                            "data":data[0]
+                        });
+                        layui.form.on('submit(edit)', function(data){
+                            data.field['access_ids'] = app.Tree.checkedId(RE).join('|');
+                            app.basic._ajax('admin.php/System/roleEdit', data.field, function(){
+                                app.lay._tableReload('更新成功','role');
+                            });
+                        });
+                    }
+                }
+                // 删除
+                if(obj.event == 'del'){
+                    var data = layui.table.checkStatus('role').data, state = '';
+                    if(data.length < 1) state = '请确认操作对象';
+                    var ids = data.map(function(el){
+                        if(el.id == 1) state = '禁止删除超级管理员';
+                        return +el.id;
+                    });
+                    if(state){
+                       layui.layer.msg(state, {icon: 5});
+                    }else{
+                        app.lay._confirm('确认删除么？', function(){
+                            app.basic._ajax('admin.php/System/roleDel', {'ids':ids}, function(result){
+                                app.lay._tableReload('删除成功','role');
+                            });
+                        });
+                    }
+                }
+            });
+        });
+
+        // 打开窗口
+        function modal(param){
+            app.lay._layer(param.title, param.filter, param.file, function(){
+                if(param.filter == 'edit'){
+                    // 权限菜单
+                    access(param.data.access_ids);
+                    // 赋值
+                    layui.form.val('form', {
+                        'id':param.data.id, 'name':param.data.name, 'detail':param.data.detail
+                    });
+                }else{
+                    access();
+                }
+            }, param.width, param.height);
+        }
+        // 权限菜单
+        function access(access_ids){
+            if(access_ids){
+                access_ids = access_ids.split('|').map(function(el){
+                    return +parseInt(el);
+                });
+            }
+            app.basic._ajax('admin.php/System/access', '' , function(result){
+                RE = app.Tree.render({
+                    elem:'#access_ids',icon_key:'title',data:result.data,
+                    checked:{key:'id',data:access_ids},
+                    cols: [{key: 'title',title: '名称',}]
+                });
+            });
+        }
+    });
+</script>

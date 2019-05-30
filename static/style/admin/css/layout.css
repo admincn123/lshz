@@ -1,0 +1,151 @@
+/*
+* @Author: 魏大毛 [1920660234@qq.com]
+* @Date:   2018-12-29 16:26:26
+* @Last Modified by:   魏大毛
+* @Last Modified time: 2019-05-22 18:10:58
+*/
+@import url(./../../../plugin/layui/css/layui.css);
+
+/*公共部分*/
+.layui-card-body{padding: 15px;}
+.layui-table-view{margin: 0;}
+.layui-laypage .layui-laypage-curr .layui-laypage-em{background: #1E9FFF;}
+.layui-tab-brief>.layui-tab-title .layui-this{color: #1E9FFF}
+.layui-tab-brief>.layui-tab-more li.layui-this:after, .layui-tab-brief>.layui-tab-title .layui-this:after{border-color: #1E9FFF}
+.layui-btn-primary:hover{color:#1E9FFF !important; border-color: #1E9FFF !important}
+.layui-table-tool-temp .layui-input{height: 30px !important;margin-bottom: 1px;}
+.table-search-box {margin-bottom: 10px;}
+.table-search-box .layui-inline,
+.table-search-box button{margin-bottom: 5px;}
+.table-search-box .layui-input{height: 30px;line-height: 30px;}
+.layui-table-cell{height: auto;}
+.layui-table-cell img{height: 80px;}
+.layui-table-cell .layui-icon-picture{width:80px;height:80px;line-height: 80px;font-size: 80px;display: inline-block;}
+.layui-textarea{min-height: 36px !important;}
+.layui-textarea p.layui-disabled{text-align: center;}
+.layui-textarea .layui-form-checkbox{margin: 4px 0 4px 4px !important;}
+/*树形 table*/
+.tree .layui-table-tool{border-bottom: none;}
+.tree .layui-table-body,
+.tree table{margin: 0;}
+.tree table tr th{border-top: none;}
+.tree table tr td[data-down]:hover{cursor: pointer;}
+.tree table tr td input{height: 26px;}
+.tree table .cbx{margin: 0 0 2px 10px !important;}
+/*树形 下拉 多选（勾选）*/
+.tree{height: 100% !important;}
+.tree ul{margin-top: 5px;}
+.tree ul:nth-child(1){margin-top: 0;}
+.tree ul li .cbx{margin:0 0 2px 5px !important;}
+/*树形 下拉 单选*/
+.tree .layui-anim dd{padding: 0;}
+.tree .layui-anim dd:hover{background: none;}
+.tree .layui-anim dd:nth-child(1):hover,
+.tree .layui-anim dd ul:hover{background: #f2f2f2}
+.tree .layui-anim dd ul{padding: 0 10px; margin-top: 0}
+
+/** 表单/弹出层表单 */
+.layui-form{height: auto;}
+.layui-layer .layui-form-item{margin-bottom: 0;}
+.layui-layer .layui-layer-content{position: static !important;}
+.layui-layer .layui-layer-content .layui-fluid{position: static;margin-bottom: 66px;margin-top: 15px}
+.layui-layer .layer-btn-box{position: absolute;bottom: -1px;right: 0;width: 100%;padding: 15px;text-align: right;background: #F8F8F8;border-top: #eee 1px solid;z-index: 19891018;}
+.layui-layer .layer-btn-box .layui-layer-close{position: static;}
+.layui-layer #layer-confirm .layui-layer-ico{top: 60px !important}
+.layui-layer .layui-tab{margin: 0;}
+.layui-layer .layui-tab-content{padding: 0;}
+.layui-layer .layui-form-select dl{z-index: 19891022;}
+.layui-layer .layui-layer-min{display: none !important;}
+/* 表单input+单位 */
+.layui-form-company{width: 100% !important;border-left: none !important;border-radius: 0 2px 0 0 !important;}
+/** 表单块状区域 **/
+.layui-form-item-box{border: #e6e6e6 1px solid;height: auto;overflow: hidden;}
+.layui-form-item-box .header{background: #FBFBFB;border-bottom: #e6e6e6 1px solid;padding: 10px 15px;}
+.layui-form-item-box .body{padding: 10px;height: auto;overflow: hidden;}
+.layui-form-item-box .body .tips{color: #FF5722;padding: 0 5px;}
+.layui-form-item-box .body a{display: inline-block;margin:5px;text-align: center;}
+.layui-form-item-box .body img{max-width: 100%;height: 100px;}
+.layui-form-item-box .body .layui-icon-picture{font-size: 100px;color: #c2c2c2}
+/* 颜色控件 */
+.layui-colorpicker{border: none;}
+
+/* header */
+/* 选择框、菜单按钮 */
+.layui-layout-admin .layui-header{height: 40px;}
+.layui-layout-admin .layui-header .layui-nav .layui-nav-item{max-height: 40px;line-height: 40px;}
+.layui-layout-admin .layui-header .layui-nav .layui-nav-item .layui-nav-child{top: 45px;}
+.layui-layout-admin .layui-header{background: none;border-bottom: 2px #2F4050 solid;}
+.layui-layout-admin .layui-logo {font-size: 18px;text-align: center;background: #2F4050;color: #1E9FFF;line-height: 40px;}
+.layui-layout-left {padding: 0;border-right: 1px solid #e6e6e6;}
+.layui-layout-left li {margin: 0 10px;}
+.layui-layout-left .flexible-pc {padding: 6px;background: #2F4050;font-size: 18px;border-radius: 2px;}
+.layui-layout-left .flexible-pc:hover {cursor: pointer;}
+.layui-layout-left .layui-this:after,
+.layui-layout-left .layui-nav-bar {background: none;}
+.layui-layout-left .layui-form {color: #333}
+.layui-layout-left .layui-form .layui-input {height: 30px;border-radius: 0;border: none;}
+.layui-layout-right .layui-nav-item a{border-left: 1px solid #e6e6e6;}
+.layui-layout-right .layui-nav-item a,
+.layui-layout-right .layui-nav-item a:hover{color: #333;}
+.layui-layout-admin .layui-body{top: 40px;}
+/* 手机 menu 按钮 */
+.flexible-mb-item {position: absolute;right: 20px;height: 100%;line-height: 40px;color: #fff;}
+.flexible-mb-item i {padding: 6px;color: #333;font-size: 18px;border-radius: 2px;}
+/* 左边菜单 */
+.layui-side {padding-bottom: 25px;background: #2F4050 !important;top: 40px !important;}
+.layui-side .admin-face {width: 200px;text-align: center;padding: 20px 0;font-size: 12px;}
+.layui-side .admin-face img {width: 84px;height: 84px;display: block;margin: 0 auto 10px auto;border: 4px solid #4E5465;border-radius: 50%;}
+.layui-side .layui-nav {background: none;}
+.layui-side .layui-nav .layui-this,
+.layui-side .layui-nav .layui-this a {background: none !important;color: #1E9FFF !important;}
+.layui-side .layui-nav a:hover {background-color: #4E5465;}
+.layui-side .layui-nav a cite {padding: 0 10px;}
+.layui-side .layui-nav .layui-icon{font-size: 16px;}
+.layui-nav-bar{background: #1E9FFF !important;}
+
+/* 中间 */
+.layui-body {background: #e6e6e6;padding: 15px;}
+.layui-body > .layui-card > .layui-tab > .layui-tab-content{padding: 15px;}
+
+/* 底部 */
+.layui-footer {text-align: center;border-top: #e1e1e1 1px solid;bottom: -1px !important;}
+
+/* 简单响应式 */
+.MB {display: none;}
+@media screen and (max-width: 768px) {
+   .PC {display: none}
+   .MB {display: inline-block}
+   .layui-side {display: none;}
+   .layui-body,
+   .layui-footer {left: 0 !important;}
+}
+
+/* 登录 */
+.login-body{background: #e6e6e6;}
+.login-body .layui-form blockquote{margin-bottom: 15px;}
+.login-body .layui-form{width: 400px;height: 265px;background: #fff;padding: 15px;position: fixed;top: 0px;left: 0px;right: 0px;bottom: 0px;margin: auto;}
+.login-body .code:hover{cursor: pointer;}
+.login-body .code{color: #1E9FFF;font-family: 'LilyUPC';font-size: 24px;letter-spacing: 5px;padding: 8px 0 !important;}
+
+/*main*/
+/*快捷方式*/
+.short-item .layui-form-item {margin-bottom: 0;}
+.short-item label i {font-size: 22px;}
+.short-item .layui-textarea {min-height: 35px !important;white-space:nowrap;overflow-x: auto;resize: none;}
+/*快捷方式 title-bg*/
+.short-item.bg label {border: none !important;color: #fff;}
+.short-item.bg .layui-textarea{border-top: none;}
+.short-item.bg .layui-row > div:nth-child(1) label{background: #009688;}
+.short-item.bg .layui-row > div:nth-child(2) label{background: #1E9FFF;}
+.short-item.bg .layui-row > div:nth-child(3) label{background: #5FB878;}
+.short-item.bg .layui-row > div:nth-child(4) label{background: #FFB800;}
+.short-item.bg .layui-row > div:nth-child(5) label{background: #FF5722;}
+.short-item.bg .layui-row > div:nth-child(6) label{background: #2F4056;}
+/*访问统计*/
+.main-count{min-height: 30px;font-size: 30px;}
+/* 更新日志 */
+.update-log ul{max-height: 127px;overflow-y: auto;}
+
+.layui-card-body .layui-form{overflow: visible}
+.layui-card-body .layui-form .layui-form-item{margin-bottom: 0;height: 38px;}
+.layui-card-header .layui-badge{float: right;top: 12px;}
